@@ -25,6 +25,8 @@ def helmConfig() {
 
 
 def helmDeploy(Map args) {
+    println "Args"
+    println args
     //configure helm client and confirm tiller process is installed
     helmConfig()
 
