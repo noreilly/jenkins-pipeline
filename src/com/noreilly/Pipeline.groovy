@@ -67,7 +67,7 @@ def helmDeploy(Object config){
     helmDeployRaw(args)
 
     if (config.app.test) {
-        pipeline.helmTest(
+        helmTest(
                 name: config.app.name
         )
     }
