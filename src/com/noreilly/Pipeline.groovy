@@ -4,7 +4,7 @@ package com.noreilly;
 def baseTemplate(body){
     podTemplate(label: 'jenkins-pipeline', containers: [
             containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.10-1-alpine', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', resourceRequestCpu: '200m', resourceLimitCpu: '300m', resourceRequestMemory: '256Mi', resourceLimitMemory: '512Mi', ttyEnabled: true),
-            containerTemplate(name: 'mvn', image: 'noreilly/mvn:1', command: 'cat', ttyEnabled: true),
+            containerTemplate(name: 'mvn', image: 'maven:3.3.3', command: 'cat', ttyEnabled: true),
             containerTemplate(name: 'docker', image: 'docker:1.12.6', command: 'cat', ttyEnabled: true),
             containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v2.6.0', command: 'cat', ttyEnabled: true)
     ],
