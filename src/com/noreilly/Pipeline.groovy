@@ -1,10 +1,10 @@
 #!/usr/bin/groovy
 package com.noreilly;
 
-def getConfig(){
+def getConfig(dir){
     def inputFile = readFile('Jenkinsfile.json')
     def config =  new groovy.json.JsonSlurperClassic().parseText(inputFile)
-    config.app.chartDir = "${pwd}/${config.app.chartDir}"
+    config.app.chartDir = "${dir}/${config.app.chartDir}"
     println(config)
     return config
 }
@@ -38,7 +38,7 @@ def helmConfig() {
 }
 
 def helmDryRun(Object config){
-    def chartDir = "${pwd}/${config.app.chartDir}"
+    def chartDir = config.app.chartDir
     helmLint(chartDir)
     def args = [
             dry_run : true,
