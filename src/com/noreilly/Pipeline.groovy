@@ -254,3 +254,5 @@ def getMapValues(Map map = [:]) {
 
     return map_values
 }
+
+return this
