@@ -3,7 +3,10 @@ package com.noreilly;
 
 def getConfig(){
     def inputFile = readFile('Jenkinsfile.json')
-    return new groovy.json.JsonSlurperClassic().parseText(inputFile)
+    def config =  new groovy.json.JsonSlurperClassic().parseText(inputFile)
+    config.app.chartDir = "${pwd}/${config.app.chartDir}"
+    println(config)
+    return config
 }
 
 def dockerBuildAndPush(Object config){
