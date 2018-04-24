@@ -45,8 +45,7 @@ def helmDryRun(Object config){
             version_tag : env.BUILD_NUMBER
     ]
 
-
-    pipeline.helmDeploy(args)
+    helmDeploy(args)
 
 }
 
