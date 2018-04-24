@@ -1,10 +1,11 @@
 #!/usr/bin/groovy
 package com.noreilly;
 
-def getConfig(dir){
+def getConfig(){
     def inputFile = readFile('Jenkinsfile.json')
     def config =  new groovy.json.JsonSlurperClassic().parseText(inputFile)
-    config.app.chartDir = "${dir}/${config.app.chartDir}"
+    def pwd = pwd()
+    config.app.chartDir = "${pwd}/${config.app.chartDir}"
     println(config)
     return config
 }
