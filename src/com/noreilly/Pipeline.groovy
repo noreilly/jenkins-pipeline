@@ -49,11 +49,30 @@ def helmDryRun(Object config){
             version_tag : env.BUILD_NUMBER
     ]
 
-    helmDeploy(args)
+    helmDeployRaw(args)
 
 }
 
-def helmDeploy(Map args) {
+def helmDeploy(Object config){
+    def chartDir = config.app.chartDir
+    helmLint(chartDir)
+    def args = [
+            dry_run : false,
+            name : config.app.name,
+            namespace : config.app.name,
+            chart_dir : chartDir,
+            version_tag : env.BUILD_NUMBER
+    ]
+
+    helmDeployRaw(args)
+
+    if (config.app.test) {
+        pipeline.helmTest(
+                name: config.app.name
+        )
+    }
+}
+def helmDeployRaw(Map args) {
     println "Args"
     println args
     //configure helm client and confirm tiller process is installed
