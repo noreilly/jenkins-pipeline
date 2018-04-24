@@ -1,16 +1,29 @@
 #!/usr/bin/groovy
 package com.noreilly;
 
-def getConfig(){
+podTemplate(label: 'base-jenkins-pipeline', containers: [
+        containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.10-1-alpine', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', resourceRequestCpu: '200m', resourceLimitCpu: '300m', resourceRequestMemory: '256Mi', resourceLimitMemory: '512Mi', ttyEnabled: true),
+        containerTemplate(name: 'mvn', image: 'noreilly/mvn:1', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'docker', image: 'docker:1.12.6', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v2.6.0', command: 'cat', ttyEnabled: true)
+],
+        volumes: [
+                hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+                persistentVolumeClaim(mountPath: '/root/.m2/repository', claimName: 'maven-repo', readOnly: false)
+        ]) {
+
+}
+
+def getConfig() {
     def inputFile = readFile('Jenkinsfile.json')
-    def config =  new groovy.json.JsonSlurperClassic().parseText(inputFile)
+    def config = new groovy.json.JsonSlurperClassic().parseText(inputFile)
     def pwd = pwd()
     config.app.chartDir = "${pwd}/${config.app.chartDir}"
     println(config)
     return config
 }
 
-def dockerBuildAndPush(Object config){
+def dockerBuildAndPush(Object config) {
     sh "docker login -u='${config.container_repo.username}' -p='${config.container_repo.password}'"
     sh "docker build -t ${config.container_repo.username}/${config.app.name}:${env.BUILD_NUMBER} ."
     sh "docker push ${config.container_repo.username}/${config.app.name}:${env.BUILD_NUMBER}"
@@ -38,30 +51,30 @@ def helmConfig() {
     sh "helm version"
 }
 
-def helmDryRun(Object config){
+def helmDryRun(Object config) {
     def chartDir = config.app.chartDir
     helmLint(chartDir)
     def args = [
-            dry_run : true,
-            name : config.app.name,
-            namespace : config.app.name,
-            chart_dir : chartDir,
-            version_tag : env.BUILD_NUMBER
+            dry_run    : true,
+            name       : config.app.name,
+            namespace  : config.app.name,
+            chart_dir  : chartDir,
+            version_tag: env.BUILD_NUMBER
     ]
 
     helmDeployRaw(args)
 
 }
 
-def helmDeploy(Object config){
+def helmDeploy(Object config) {
     def chartDir = config.app.chartDir
     helmLint(chartDir)
     def args = [
-            dry_run : false,
-            name : config.app.name,
-            namespace : config.app.name,
-            chart_dir : chartDir,
-            version_tag : env.BUILD_NUMBER
+            dry_run    : false,
+            name       : config.app.name,
+            namespace  : config.app.name,
+            chart_dir  : chartDir,
+            version_tag: env.BUILD_NUMBER
     ]
 
     helmDeployRaw(args)
@@ -72,6 +85,7 @@ def helmDeploy(Object config){
         )
     }
 }
+
 def helmDeployRaw(Map args) {
     println "Args"
     println args
@@ -106,9 +120,9 @@ def helmDeployRaw(Map args) {
 }
 
 def helmDelete(Map args) {
-        println "Running helm delete ${args.name}"
+    println "Running helm delete ${args.name}"
 
-        sh "helm delete ${args.name}"
+    sh "helm delete ${args.name}"
 }
 
 def helmTest(Map args) {
@@ -223,15 +237,15 @@ def getContainerRepoAcct(config) {
 }
 
 @NonCPS
-def getMapValues(Map map=[:]) {
+def getMapValues(Map map = [:]) {
     // jenkins and workflow restriction force this function instead of map.values(): https://issues.jenkins-ci.org/browse/JENKINS-27421
     def entries = []
     def map_values = []
 
     entries.addAll(map.entrySet())
 
-    for (int i=0; i < entries.size(); i++){
-        String value =  entries.get(i).value
+    for (int i = 0; i < entries.size(); i++) {
+        String value = entries.get(i).value
         map_values.add(value)
     }
 
