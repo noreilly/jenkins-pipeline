@@ -1,7 +1,7 @@
 #!/usr/bin/groovy
 package com.noreilly;
 
-def defineBase(){
+def defineBase(body){
     podTemplate(label: 'base-jenkins-pipeline', containers: [
             containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.10-1-alpine', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', resourceRequestCpu: '200m', resourceLimitCpu: '300m', resourceRequestMemory: '256Mi', resourceLimitMemory: '512Mi', ttyEnabled: true),
             containerTemplate(name: 'mvn', image: 'noreilly/mvn:1', command: 'cat', ttyEnabled: true),
@@ -12,7 +12,7 @@ def defineBase(){
                     hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
                     persistentVolumeClaim(mountPath: '/root/.m2/repository', claimName: 'maven-repo', readOnly: false)
             ]) {
-
+        body()
     }
 }
 
