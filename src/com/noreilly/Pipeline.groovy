@@ -35,7 +35,7 @@ def helmConfig() {
 }
 
 def helmDryRun(Object config){
-    def chartDir = "${pwd}/${chart.app.chartDir}"
+    def chartDir = "${pwd}/${config.chart.app.chartDir}"
     helmLint(chartDir)
     def args = [
             dry_run : true,
