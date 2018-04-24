@@ -26,7 +26,8 @@ def getConfig() {
     return config
 }
 
-def dockerBuildAndPush(Object config) {
+def dockerBuildAndPush() {
+    def config = getConfig()
     sh "docker login -u='${config.container_repo.username}' -p='${config.container_repo.password}'"
     sh "docker build -t ${config.container_repo.username}/${config.app.name}:${env.BUILD_NUMBER} ."
     sh "docker push ${config.container_repo.username}/${config.app.name}:${env.BUILD_NUMBER}"
@@ -54,7 +55,9 @@ def helmConfig() {
     sh "helm version"
 }
 
-def helmDryRun(Object config) {
+def helmDryRun() {
+    def config = getConfig()
+
     def chartDir = config.app.chartDir
     helmLint(chartDir)
     def args = [
@@ -69,7 +72,8 @@ def helmDryRun(Object config) {
 
 }
 
-def helmDeploy(Object config) {
+def helmDeploy() {
+    def config = getConfig()
     def chartDir = config.app.chartDir
     helmLint(chartDir)
     def args = [
