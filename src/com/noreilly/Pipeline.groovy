@@ -1,7 +1,7 @@
 #!/usr/bin/groovy
 package com.noreilly;
 
-def defineBase(body){
+def baseTemplate(body){
     podTemplate(label: 'base-jenkins-pipeline', containers: [
             containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.10-1-alpine', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', resourceRequestCpu: '200m', resourceLimitCpu: '300m', resourceRequestMemory: '256Mi', resourceLimitMemory: '512Mi', ttyEnabled: true),
             containerTemplate(name: 'mvn', image: 'noreilly/mvn:1', command: 'cat', ttyEnabled: true),
