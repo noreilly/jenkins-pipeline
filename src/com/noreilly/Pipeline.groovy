@@ -1,5 +1,16 @@
 #!/usr/bin/groovy
-package io.estrado;
+package com.noreilly;
+
+def getConfig(){
+    def inputFile = readFile('Jenkinsfile.json')
+    return new groovy.json.JsonSlurperClassic().parseText(inputFile)
+}
+
+def dockerBuildAndPush(Object config){
+    sh "docker login -u='${config.container_repo.username}' -p='${config.container_repo.password}'"
+    sh "docker build -t ${config.container_repo.username}/${config.app.name}:${env.BUILD_NUMBER} ."
+    sh "docker push ${config.container_repo.username}/${config.app.name}:${env.BUILD_NUMBER}"
+}
 
 def kubectlTest() {
     // Test that kubectl can correctly communication with the Kubernetes API
@@ -23,6 +34,21 @@ def helmConfig() {
     sh "helm version"
 }
 
+def helmDryRun(Object config){
+    def chartDir = "${pwd}/${chart.app.chartDir}"
+    helmLint(chartDir)
+    def args = [
+            dry_run : true,
+            name : config.app.name,
+            namespace : config.app.name,
+            chart_dir : chartDir,
+            version_tag : env.BUILD_NUMBER
+    ]
+
+
+    pipeline.helmDeploy(args)
+
+}
 
 def helmDeploy(Map args) {
     println "Args"
