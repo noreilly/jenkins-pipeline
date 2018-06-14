@@ -2,125 +2,95 @@
 package com.noreilly;
 
 def baseTemplate(body){
-    podTemplate(label: 'jenkins-pipeline', containers: [
-            containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.10-1-alpine', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', resourceRequestCpu: '200m', resourceLimitCpu: '300m', resourceRequestMemory: '256Mi', resourceLimitMemory: '512Mi', ttyEnabled: true),
-            containerTemplate(name: 'mvn', image: 'maven:3.3.3', command: 'cat', ttyEnabled: true),
-            containerTemplate(name: 'docker', image: 'docker:1.12.6', command: 'cat', ttyEnabled: true),
-            containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v2.6.0', command: 'cat', ttyEnabled: true)
+    podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
+            containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.19-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
+            containerTemplate(name: 'mvn', image: 'maven:3.5.3', command: 'cat', ttyEnabled: true),
+            containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:2.8.2', command: 'cat', ttyEnabled: true)
     ],
-            volumes: [
-                    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
-                    persistentVolumeClaim(mountPath: '/root/.m2/repository', claimName: 'maven-repo', readOnly: false)
-            ]) {
+    volumes: [
+        hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+    ])
+    {
         body()
     }
 }
 
-
-def getConfig() {
-    def inputFile = readFile('Jenkinsfile.json')
-    def config = new groovy.json.JsonSlurperClassic().parseText(inputFile)
-    def pwd = pwd()
-    config.app.chartDir = "${pwd}/${config.app.chartDir}"
-    println(config)
-    return config
+def kubectlTestConnectivity() {
+    sh "kubectl get nodes > /dev/null"
 }
 
-def dockerBuildAndPush() {
-    def config = getConfig()
-    sh "docker login -u='${config.container_repo.username}' -p='${config.container_repo.password}'"
-    sh "docker build -t ${config.container_repo.username}/${config.app.name}:${env.BUILD_NUMBER} ."
-    sh "docker push ${config.container_repo.username}/${config.app.name}:${env.BUILD_NUMBER}"
+def helmLint() {
+    sh "helm lint deploy"
 }
 
-def kubectlTest() {
-    // Test that kubectl can correctly communication with the Kubernetes API
-    println "checking kubectl connnectivity to the API"
-    sh "kubectl get nodes"
-
-}
-
-def helmLint(String chart_dir) {
-    // lint helm chart
-    println "running helm lint ${chart_dir}"
-    sh "helm lint ${chart_dir}"
-
-}
-
-def helmConfig() {
-    //setup helm connectivity to Kubernetes API and Tiller
-    println "initiliazing helm client"
-    sh "helm init"
-    println "checking client/server version"
-    sh "helm version"
+def helmRenderConfig() {
+    sh '''
+helm init
+helm version
+env
+find "deploy/" -type f -name "*.template" | while IFS= read -r template; do
+    output="${template%.*}"
+    sigil -f "${template}" IMAGE_TAG="${IMAGE_TAG}" IMAGE_REPO="${IMAGE_REPO}" > "${output}"
+done
+helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
+helm dependency build "deploy/"
+    '''
 }
 
 def helmDryRun() {
     def config = getConfig()
 
-    def chartDir = config.app.chartDir
-    helmLint(chartDir)
+    helmRenderConfig()
+    helmLint()
+
     def args = [
             dry_run    : true,
-            name       : config.app.name,
-            namespace  : config.app.name,
-            chart_dir  : chartDir,
-            version_tag: env.BUILD_NUMBER
+            name       : config.helm.name,
+            namespace  : config.helm.namespace
     ]
 
     helmDeployRaw(args)
 
+}
+
+def getConfig() {
+    def inputFile = readFile('Jenkinsfile.json')
+    def config = new groovy.json.JsonSlurperClassic().parseText(inputFile)
+    println(config)
+    return config
 }
 
 def helmDeploy() {
     def config = getConfig()
-    def chartDir = config.app.chartDir
-    helmLint(chartDir)
+
+    helmLint()
+
     def args = [
             dry_run    : false,
-            name       : config.app.name,
-            namespace  : config.app.name,
-            chart_dir  : chartDir,
-            version_tag: env.BUILD_NUMBER
+            name       : config.helm.name,
+            namespace  : config.helm.namespace
     ]
 
     helmDeployRaw(args)
-
-    if (config.app.test) {
-        helmTest(
-                name: config.app.name
-        )
-    }
 }
 
 def helmDeployRaw(Map args) {
-    println "Args"
-    println args
-    //configure helm client and confirm tiller process is installed
-    helmConfig()
+    helmRenderConfig()
 
-    def String namespace
-
-    // If namespace isn't parsed into the function set the namespace to the name
     if (args.namespace == null) {
-        namespace = args.name
+        namespace = "default"
     } else {
         namespace = args.namespace
     }
 
     if (args.dry_run) {
         println "Running dry-run deployment"
-        println "Chart directory ${args.chart_dir}"
 
-        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},replicas=${args.replicas},cpu=${args.cpu},memory=${args.memory},ingress.hostname=${args.hostname} --namespace=${namespace}"
+        sh "helm upgrade --dry-run --install ${args.name} deploy --namespace=${namespace}"
     } else {
         println "Running deployment"
 
-        // reimplement --wait once it works reliable
-        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},replicas=${args.replicas},cpu=${args.cpu},memory=${args.memory},ingress.hostname=${args.hostname} --namespace=${namespace}"
-
-        // sleeping until --wait works reliably
-        sleep(20)
+        sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace}"
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
@@ -130,117 +100,6 @@ def helmDelete(Map args) {
     println "Running helm delete ${args.name}"
 
     sh "helm delete ${args.name}"
-}
-
-def helmTest(Map args) {
-    println "Running Helm test"
-
-    sh "helm test ${args.name} --cleanup"
-}
-
-def gitEnvVars() {
-    // create git envvars
-    println "Setting envvars to tag container"
-
-    sh 'git rev-parse HEAD > git_commit_id.txt'
-    try {
-        env.GIT_COMMIT_ID = readFile('git_commit_id.txt').trim()
-        env.GIT_SHA = env.GIT_COMMIT_ID.substring(0, 7)
-    } catch (e) {
-        error "${e}"
-    }
-    println "env.GIT_COMMIT_ID ==> ${env.GIT_COMMIT_ID}"
-
-    sh 'git config --get remote.origin.url> git_remote_origin_url.txt'
-    try {
-        env.GIT_REMOTE_URL = readFile('git_remote_origin_url.txt').trim()
-    } catch (e) {
-        error "${e}"
-    }
-    println "env.GIT_REMOTE_URL ==> ${env.GIT_REMOTE_URL}"
-}
-
-
-def containerBuildPub(Map args) {
-
-    println "Running Docker build/publish: ${args.host}/${args.acct}/${args.repo}:${args.tags}"
-
-    docker.withRegistry("https://${args.host}", "${args.auth_id}") {
-
-        // def img = docker.build("${args.acct}/${args.repo}", args.dockerfile)
-        def img = docker.image("${args.acct}/${args.repo}")
-        sh "docker build --build-arg VCS_REF=${env.GIT_SHA} --build-arg BUILD_DATE=`date -u +'%Y-%m-%dT%H:%M:%SZ'` -t ${args.acct}/${args.repo} ${args.dockerfile}"
-        for (int i = 0; i < args.tags.size(); i++) {
-            img.push(args.tags.get(i))
-        }
-
-        return img.id
-    }
-}
-
-def getContainerTags(config, Map tags = [:]) {
-
-    println "getting list of tags for container"
-    def String commit_tag
-    def String version_tag
-
-    try {
-        // if PR branch tag with only branch name
-        if (env.BRANCH_NAME.contains('PR')) {
-            commit_tag = env.BRANCH_NAME
-            tags << ['commit': commit_tag]
-            return tags
-        }
-    } catch (Exception e) {
-        println "WARNING: commit unavailable from env. ${e}"
-    }
-
-    // commit tag
-    try {
-        // if branch available, use as prefix, otherwise only commit hash
-        if (env.BRANCH_NAME) {
-            commit_tag = env.BRANCH_NAME + '-' + env.GIT_COMMIT_ID.substring(0, 7)
-        } else {
-            commit_tag = env.GIT_COMMIT_ID.substring(0, 7)
-        }
-        tags << ['commit': commit_tag]
-    } catch (Exception e) {
-        println "WARNING: commit unavailable from env. ${e}"
-    }
-
-    // master tag
-    try {
-        if (env.BRANCH_NAME == 'master') {
-            tags << ['master': 'latest']
-        }
-    } catch (Exception e) {
-        println "WARNING: branch unavailable from env. ${e}"
-    }
-
-    // build tag only if none of the above are available
-    if (!tags) {
-        try {
-            tags << ['build': env.BUILD_TAG]
-        } catch (Exception e) {
-            println "WARNING: build tag unavailable from config.project. ${e}"
-        }
-    }
-
-    return tags
-}
-
-def getContainerRepoAcct(config) {
-
-    println "setting container registry creds according to Jenkinsfile.json"
-    def String acct
-
-    if (env.BRANCH_NAME == 'master') {
-        acct = config.container_repo.master_acct
-    } else {
-        acct = config.container_repo.alt_acct
-    }
-
-    return acct
 }
 
 @NonCPS
