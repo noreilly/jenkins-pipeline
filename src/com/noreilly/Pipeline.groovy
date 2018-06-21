@@ -40,6 +40,9 @@ def kubectlTest() {
 
 }
 
+def addHelmRepo(){
+    sh "helm repo add 'shipyard-stable' 'https://storage.googleapis.com/pd-stable-helm-charts'"
+}
 def helmLint(String chart_dir) {
     // lint helm chart
     println "running helm lint ${chart_dir}"
@@ -53,6 +56,7 @@ def helmConfig() {
     sh "helm init"
     println "checking client/server version"
     sh "helm version"
+    addHelmRepo()
 }
 
 def helmDryRun() {
