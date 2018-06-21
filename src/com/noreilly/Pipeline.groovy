@@ -63,7 +63,6 @@ def helmDryRun() {
     def config = getConfig()
 
     def chartDir = config.app.chartDir
-    sh "helm dependency build ${chartDir}"
     helmLint(chartDir)
     def args = [
             dry_run    : true,
@@ -80,7 +79,6 @@ def helmDryRun() {
 def helmDeploy() {
     def config = getConfig()
     def chartDir = config.app.chartDir
-    sh "helm dependency build ${chartDir}"
     helmLint(chartDir)
     def args = [
             dry_run    : false,
@@ -106,7 +104,7 @@ def helmDeployRaw(Map args) {
     helmConfig()
 
     def String namespace
-
+    sh "helm dependency build ${chartDir}"
     // If namespace isn't parsed into the function set the namespace to the name
     if (args.namespace == null) {
         namespace = args.name
