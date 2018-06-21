@@ -104,7 +104,7 @@ def helmDeployRaw(Map args) {
     helmConfig()
 
     def String namespace
-    sh "helm dependency build ${chartDir}"
+    sh "helm dependency build ${args.chart_dir}"
     // If namespace isn't parsed into the function set the namespace to the name
     if (args.namespace == null) {
         namespace = args.name
