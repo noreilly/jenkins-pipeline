@@ -85,7 +85,8 @@ def helmDeploy() {
             name       : config.app.name,
             namespace  : config.app.name,
             chart_dir  : chartDir,
-            version_tag: env.BUILD_NUMBER
+            version_tag: env.BUILD_NUMBER,
+            chart_image_tag_name: config.chart.imageTagName
     ]
 
     helmDeployRaw(args)
@@ -116,12 +117,12 @@ def helmDeployRaw(Map args) {
         println "Running dry-run deployment"
         println "Chart directory ${args.chart_dir}"
 
-        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},replicas=${args.replicas},cpu=${args.cpu},memory=${args.memory},ingress.hostname=${args.hostname} --namespace=${namespace}"
+        sh "helm upgrade --dry-run --install ${args.name} ${args.chart_dir} --set ${chart_image_tag_name}=${args.version_tag},replicas=${args.replicas},cpu=${args.cpu},memory=${args.memory},ingress.hostname=${args.hostname} --namespace=${namespace}"
     } else {
         println "Running deployment"
 
         // reimplement --wait once it works reliable
-        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} --set image.tag=${args.version_tag},replicas=${args.replicas},cpu=${args.cpu},memory=${args.memory},ingress.hostname=${args.hostname} --namespace=${namespace}"
+        sh "helm upgrade --wait --install ${args.name} ${args.chart_dir} --set ${chart_image_tag_name}=${args.version_tag},replicas=${args.replicas},cpu=${args.cpu},memory=${args.memory},ingress.hostname=${args.hostname} --namespace=${namespace}"
 
         // sleeping until --wait works reliably
         sleep(20)
