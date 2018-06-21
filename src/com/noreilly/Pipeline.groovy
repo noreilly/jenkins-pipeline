@@ -87,11 +87,11 @@ def helmDeployRaw(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} deploy --namespace=${namespace}"
+        sh "helm upgrade --dry-run --install ${args.name} deploy --namespace=${namespace}" -f values.yaml
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace}"
+        sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace}" -f values.yaml
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
