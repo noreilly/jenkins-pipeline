@@ -59,6 +59,7 @@ def helmDryRun() {
     def config = getConfig()
 
     def chartDir = config.app.chartDir
+    sh "helm dependency build ${chart_dir}"
     helmLint(chartDir)
     def args = [
             dry_run    : true,
@@ -75,6 +76,7 @@ def helmDryRun() {
 def helmDeploy() {
     def config = getConfig()
     def chartDir = config.app.chartDir
+    sh "helm dependency build ${chart_dir}"
     helmLint(chartDir)
     def args = [
             dry_run    : false,
