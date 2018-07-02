@@ -35,6 +35,7 @@ find "deploy/" -type f -name "*.template" | while IFS= read -r template; do
     sigil -f "${template}" IMAGE_TAG="${IMAGE_TAG}" IMAGE_REPO="${IMAGE_REPO}" > "${output}"
 done
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
+helm repo add brigade https://azure.github.io/brigade
 helm dependency build "deploy/"
     '''
 }
