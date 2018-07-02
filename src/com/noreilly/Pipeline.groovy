@@ -36,6 +36,7 @@ find "deploy/" -type f -name "*.template" | while IFS= read -r template; do
 done
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
 helm repo add brigade https://azure.github.io/brigade
+helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
 helm dependency build "deploy/"
     '''
 }
