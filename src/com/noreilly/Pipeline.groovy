@@ -1,7 +1,10 @@
 #!/usr/bin/groovy
 package com.noreilly;
 
-def baseTemplate(body){
+def baseTemplate(body, envVars){
+    if(envVars == null){
+        envVars = [];
+    }
     podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
             containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.19-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
             containerTemplate(name: 'mvn', image: 'maven:3.5.3', command: 'cat', ttyEnabled: true),
@@ -11,7 +14,8 @@ def baseTemplate(body){
     ],
     volumes: [
         hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
-    ])
+    ],
+    envVars: envVars)
     {
         body()
     }
