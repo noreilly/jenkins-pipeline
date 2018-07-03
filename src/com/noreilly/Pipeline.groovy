@@ -34,6 +34,8 @@ find "deploy/" -type f -name "*.template" | while IFS= read -r template; do
     output="${template%.*}"
     sigil -f "${template}" IMAGE_TAG="${IMAGE_TAG}" IMAGE_REPO="${IMAGE_REPO}" > "${output}"
 done
+echo "Printing rendered Helm Values"
+cat deploy/values.yaml
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
 helm repo add brigade https://azure.github.io/brigade
 helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
