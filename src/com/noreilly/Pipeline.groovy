@@ -9,7 +9,7 @@ def baseTemplate(envVars, body){
             containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.1', command: 'cat', ttyEnabled: true,envVars:envVars),
             containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:2.8.2', command: 'cat', ttyEnabled: true)
     ],
-    envVars: [envVar(key: 'TESTIIIIT_BOOL', value: 'true')]),
+    envVars: [envVar(key: 'TESTIIIIT_BOOL', value: 'true')],
     volumes: [
         hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
     ]){
