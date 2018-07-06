@@ -1,15 +1,14 @@
 #!/usr/bin/groovy
 package com.noreilly;
 
-def baseTemplate(envVars, body){
+def baseTemplate(body){
     podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
             containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.19-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
-            containerTemplate(name: 'mvn', image: 'maven:3.5.3', command: 'cat', ttyEnabled: true,envVars:envVars),
-            containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.0.1', command: 'cat', ttyEnabled: true,envVars:envVars),
-            containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.1', command: 'cat', ttyEnabled: true,envVars:envVars),
+            containerTemplate(name: 'mvn', image: 'maven:3.5.3', command: 'cat', ttyEnabled: true),
+            containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.0.1', command: 'cat', ttyEnabled: true),
+            containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.1', command: 'cat', ttyEnabled: true),
             containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:2.8.2', command: 'cat', ttyEnabled: true)
     ],
-    envVars: [envVar(key: 'TESTIIIIT_BOOL', value: 'true')],
     volumes: [
         hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
     ]){
