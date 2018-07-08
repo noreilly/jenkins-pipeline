@@ -61,9 +61,12 @@ def helmDryRun() {
 
 def switchKubeContext(){
 	if( env.CLOUD_TYPE == "GKE"){
-	     sh 'echo "$CLOUD_CREDENTIALS" > /tmp/creds.json'
-	     sh "gcloud auth activate-service-account --key-file /tmp/creds.json"	
-	     sh "gcloud container clusters get-credentials $GKE_CLUSTER  --zone $GKE_ZONE"		
+	     sh """
+		     echo "$CLOUD_CREDENTIALS" > | sed "s/'/\"/g" /tmp/creds.json;
+		     gcloud auth activate-service-account --key-file /tmp/creds.json;
+		     gcloud container clusters get-credentials $GKE_CLUSTER  --zone $GKE_ZONE
+	     """
+	   
 	}
 
 }
