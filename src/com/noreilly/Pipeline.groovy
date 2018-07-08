@@ -67,7 +67,6 @@ def switchKubeContext(){
 		     cat /tmp/creds.json;
 		     gcloud auth activate-service-account --key-file /tmp/creds.json;
 		     export CLOUDSDK_CORE_PROJECT=portdynamics
-		     tail -f /dev/null
 		     gcloud container clusters get-credentials $CLOUD_TEST_CLUSTER_NAME  --zone $CLOUD_TEST_CLUSTER_ZONE
 		     kubectl get pods
 	     """
