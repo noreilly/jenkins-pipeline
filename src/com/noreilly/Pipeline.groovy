@@ -59,7 +59,7 @@ def helmDryRun() {
 
 }
 
-def switchKubeCtontext(){
+def switchKubeContext(){
      sh "gcloud container clusters get-credentials $GKE_CLUSTER  --zone $GKE_ZONE"
 }
 
