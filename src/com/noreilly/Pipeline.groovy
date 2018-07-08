@@ -7,7 +7,7 @@ def baseTemplate(body){
             containerTemplate(name: 'mvn', image: 'maven:3.5.3', command: 'cat', ttyEnabled: true),
             containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.0.1', command: 'cat', ttyEnabled: true),
             containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.1', command: 'cat', ttyEnabled: true),
-            containerTemplate(name: 'helm', image: 'gcr.io/portdynamics/gcloud-helm:0.1', command: 'cat', ttyEnabled: true)
+            containerTemplate(name: 'helm', image: 'gcr.io/portdynamics/gcloud-helm:0.2', command: 'cat', ttyEnabled: true)
     ],
     volumes: [
         hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
