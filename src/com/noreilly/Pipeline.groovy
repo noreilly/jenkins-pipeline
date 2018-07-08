@@ -1,4 +1,4 @@
-f#!/usr/bin/groovy
+#!/usr/bin/groovy
 package com.noreilly;
 
 def baseTemplate(body){
