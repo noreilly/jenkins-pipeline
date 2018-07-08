@@ -45,7 +45,7 @@ helm dependency build "deploy/"
 
 def helmDryRun() {
     def config = getConfig()
-	switchKubeCtontext()
+	switchKubeContext()
     helmRenderConfig()
     helmLint()
 
