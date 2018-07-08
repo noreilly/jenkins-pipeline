@@ -64,6 +64,7 @@ def switchKubeContext(){
 	     sh """
 		     #!/bin/sh -e
 		     echo "$CLOUD_CREDENTIALS"  | sed 's/'\\''/"/g'  > /tmp/creds.json;
+		     echo /tmp/creds.json
 		     gcloud auth activate-service-account --key-file /tmp/creds.json;
 		     gcloud container clusters get-credentials $GKE_CLUSTER  --zone $GKE_ZONE
 	     """
