@@ -62,7 +62,7 @@ def helmDryRun() {
 def switchKubeContext(){
 	if( env.CLOUD_TYPE == "GKE"){
 	     sh """
-		     set +x 
+		    # set +x 
 		     echo '$CLOUD_CREDENTIALS' > /tmp/creds.json;
 		     cat /tmp/creds.json;
 		     gcloud auth activate-service-account --key-file /tmp/creds.json;
