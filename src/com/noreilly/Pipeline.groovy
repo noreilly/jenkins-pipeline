@@ -45,7 +45,7 @@ helm dependency build "deploy/"
 
 def helmDryRun() {
     def config = getConfig()
-	switchKubeContext()
+    switchKubeContext()
     helmRenderConfig()
     helmLint()
 
@@ -60,7 +60,12 @@ def helmDryRun() {
 }
 
 def switchKubeContext(){
-     sh "gcloud container clusters get-credentials $GKE_CLUSTER  --zone $GKE_ZONE"
+	if( ${env.JOB_NAME} == "GKE"){
+	     sh "echo $CLOUD_CREDENTIALS > /tmp/creds.json"
+	     sh "gcloud auth activate-service-account /tmp/creds.json"	
+	     sh "gcloud container clusters get-credentials $GKE_CLUSTER  --zone $GKE_ZONE"		
+	}
+
 }
 
 def getConfig() {
