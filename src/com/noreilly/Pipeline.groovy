@@ -73,7 +73,7 @@ def switchKubeContext(String envrionment){
 		   clusterName = env.CLOUD_TEST_CLUSTER_NAME  
 		   clusterZone = env.CLOUD_TEST_CLUSTER_ZONE   
 	     }	
-	     if(clusterName == null "" clusterZone == null){
+	     if(clusterName == null || clusterZone == null){
 		     throw new RuntimeException("Environment ${envrionment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")	     
 	     }
 		
