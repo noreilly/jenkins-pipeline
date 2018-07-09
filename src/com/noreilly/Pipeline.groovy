@@ -43,9 +43,9 @@ helm dependency build "deploy/"
     '''
 }
 
-def helmDryRun(String envrionment) {
+def helmDryRun(String environment) {
     def config = getConfig()
-    switchKubeContext(envrionment)
+    switchKubeContext(environment)
     helmRenderConfig()
     helmLint()
 
@@ -59,17 +59,17 @@ def helmDryRun(String envrionment) {
 
 }
 
-def switchKubeContext(String envrionment){
-	if(enviroment == null){
+def switchKubeContext(String environment){
+	if(environment == null){
 	    throw new RuntimeException("Please select an environment to deloy to. Prod or test")	
 	}
 	if( env.CLOUD_TYPE == "GKE"){
 	     String clusterName	
  	     String clusterZone
-             if(envrionment == "prod"){ 
+             if(environment == "prod"){ 
 		   clusterName = env.CLOUD_PROD_CLUSTER_NAME  
 		   clusterZone = env.CLOUD_PROD_CLUSTER_ZONE  
-	     } else if(envrionment == "test"){
+	     } else if(environment == "test"){
 		   clusterName = env.CLOUD_TEST_CLUSTER_NAME  
 		   clusterZone = env.CLOUD_TEST_CLUSTER_ZONE   
 	     }	
@@ -99,7 +99,7 @@ def getConfig() {
 
 def helmDeploy(String environment) {
     def config = getConfig()
-    switchKubeContext(envrionment)	
+    switchKubeContext(environment)	
 
     helmLint()
 
