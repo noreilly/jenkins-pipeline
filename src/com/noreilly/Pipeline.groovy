@@ -60,6 +60,9 @@ def helmDryRun(String envrionment) {
 }
 
 def switchKubeContext(String envrionment){
+	if(enviroment == null){
+	    throw new RuntimeException("Please select an environment to deloy to. Prod or test")	
+	}
 	if( env.CLOUD_TYPE == "GKE"){
 	     String clusterName	
  	     String clusterZone
