@@ -43,9 +43,9 @@ helm dependency build "deploy/"
     '''
 }
 
-def helmDryRun() {
+def helmDryRun(String envrionment) {
     def config = getConfig()
-    switchKubeContext()
+    switchKubeContext(envrionment)
     helmRenderConfig()
     helmLint()
 
@@ -59,8 +59,21 @@ def helmDryRun() {
 
 }
 
-def switchKubeContext(){
+def switchKubeContext(String envrionment){
 	if( env.CLOUD_TYPE == "GKE"){
+	     String clusterName	
+ 	     String clusterZone
+             if(envrionment == "prod"){ 
+		   clusterName = env.CLOUD_PROD_CLUSTER_NAME  
+		   clusterZone = env.CLOUD_PROD_CLUSTER_ZONE  
+	     } else if(envrionment == "test"){
+		   clusterName = env.CLOUD_TEST_CLUSTER_NAME  
+		   clusterZone = env.CLOUD_TEST_CLUSTER_ZONE   
+	     }	
+	     if(clusterName == null "" clusterZone == null){
+		     throw new RuntimeException("Environment ${envrionment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")	     
+	     }
+		
 	     sh """
 		    # set +x 
 		     echo '$CLOUD_CREDENTIALS' > /tmp/creds.json;
@@ -81,8 +94,9 @@ def getConfig() {
     return config
 }
 
-def helmDeploy() {
+def helmDeploy(String environment) {
     def config = getConfig()
+    switchKubeContext(envrionment)	
 
     helmLint()
 
