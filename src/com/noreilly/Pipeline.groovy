@@ -36,7 +36,7 @@ done
 echo "Printing rendered Helm Values"
 cat deploy/values.yaml
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
-#helm repo add brigade https://azure.github.io/brigade
+helm repo add brigade https://azure.github.io/brigade
 helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
 rm -f deploy/requirements.lock
 helm dependency build "deploy/"
@@ -44,8 +44,6 @@ helm dependency build "deploy/"
 }
 
 def helmDryRun(String environment) {
-    print("ASDASD")	
-    sh "gcloud container clusters get-credentials factory-created-cluster-test  --zone europe-west1-c"
     def config = getConfig()
     switchKubeContext(environment)
     helmRenderConfig()
@@ -79,11 +77,7 @@ def switchKubeContext(String environment){
 		     throw new RuntimeException("Environment ${envrionment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")	     
 	     }
 		
-	     sh """
-		    # set +x 
-		   //  echo '$CLOUD_CREDENTIALS' > /tmp/creds.json;
-		   //  cat /tmp/creds.json;
-		 //    gcloud auth activate-service-account --key-file /tmp/creds.json;
+	     sh """		   
 		     gcloud container clusters get-credentials $CLOUD_TEST_CLUSTER_NAME  --zone $CLOUD_TEST_CLUSTER_ZONE
 		     kubectl get pods
 	     """
