@@ -36,7 +36,7 @@ done
 echo "Printing rendered Helm Values"
 cat deploy/values.yaml
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
-helm repo add brigade https://azure.github.io/brigade
+//helm repo add brigade https://azure.github.io/brigade
 helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
 rm -f deploy/requirements.lock
 helm dependency build "deploy/"
