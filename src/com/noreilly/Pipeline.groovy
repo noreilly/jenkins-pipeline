@@ -45,7 +45,7 @@ helm dependency build "deploy/"
 
 def helmDryRun(String environment) {
     print("ASDASD")	
-    sh "gcloud container clusters get-credentials CLOUD_TEST_CLUSTER_NAME  --zone CLOUD_TEST_CLUSTER_ZONE"
+    sh "gcloud container clusters get-credentials factory-created-cluster-test  --zone europe-west1-c"
     def config = getConfig()
     switchKubeContext(environment)
     helmRenderConfig()
