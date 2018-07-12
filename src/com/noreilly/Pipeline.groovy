@@ -43,6 +43,22 @@ helm dependency build "deploy/"
     '''
 }
 
+def helmDryRun() {
+    def config = getConfig()
+
+    helmRenderConfig()
+    helmLint()
+
+    def args = [
+            dry_run    : true,
+            name       : config.helm.name,
+            namespace  : config.helm.namespace
+    ]
+
+    helmDeployRaw(args)
+
+}
+
 def helmDryRun(String environment) {
     def config = getConfig()
     switchKubeContext(environment)
