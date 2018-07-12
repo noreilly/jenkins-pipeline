@@ -43,7 +43,7 @@ helm dependency build "deploy/"
     '''
 }
 
-def helmDryRun() {
+def helmDryRun(String environment) {
     def config = getConfig()
 
     helmRenderConfig()
@@ -55,12 +55,7 @@ def helmDryRun() {
             namespace  : config.helm.namespace
     ]
 
-    helmDeployRaw(args, "test")
-
-}
-
-def helmDryRun(String environment) {
-   helmDryRun()
+    helmDeployRaw(args, environment)
 
 }
 
