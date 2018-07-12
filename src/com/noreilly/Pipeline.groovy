@@ -127,7 +127,7 @@ def helmDeployRaw(Map args) {
         sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace} -f deploy/values.yaml"
 
 	sh """
-hosts="$(kubectl get ingress -l "release=${args.name}" -o json | jq -r ".items[0].spec.rules[] | .host")"
+hosts="\$(kubectl get ingress -l "release=${args.name}" -o json | jq -r ".items[0].spec.rules[] | .host")"
 
 for host in \${hosts}; do
   echo "Attempting to resolve \${host}..."
