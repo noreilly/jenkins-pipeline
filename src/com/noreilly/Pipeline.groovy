@@ -55,7 +55,7 @@ def helmDryRun() {
             namespace  : config.helm.namespace
     ]
 
-    helmDeployRaw(args)
+    helmDeployRaw(args, "test")
 
 }
 
@@ -110,10 +110,10 @@ def helmDeploy(String environment) {
             namespace  : config.helm.namespace
     ]
 
-    helmDeployRaw(args)
+    helmDeployRaw(args, environment)
 }
 
-def helmDeployRaw(Map args) {
+def helmDeployRaw(Map args, String environment) {
     helmRenderConfig()
 
     if (args.namespace == null) {
@@ -125,11 +125,11 @@ def helmDeployRaw(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} deploy --namespace=${namespace} -f deploy/values.yaml"
+        sh "helm upgrade --dry-run --install ${args.name} deploy --namespace=${namespace} -f deploy/${environment}.values.yaml"
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace} -f deploy/values.yaml"
+	    sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace} -f deploy/${environment}.values.yaml"
 
 	sh """
 hosts="\$(kubectl get ingress -l "release=${args.name}" -o json | jq -r ".items[0].spec.rules[] | .host")"
