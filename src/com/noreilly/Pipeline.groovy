@@ -134,7 +134,7 @@ for host in \${hosts}; do
   until host \${host};
   do
     echo "Waiting for \${host} to resolve..."
-    sleep 1
+    sleep 30
   done;
 done
 	"""
