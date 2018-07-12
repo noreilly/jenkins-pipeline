@@ -43,9 +43,33 @@ helm dependency build "deploy/"
     '''
 }
 
-def helmDryRun() {
-    def config = getConfig()
 
+def helmLint() {
+    sh "helm lint deploy"
+}
+
+def helmRenderConfig() {
+    sh '''
+helm init
+helm version
+env
+find "deploy/" -type f -name "*.template" | while IFS= read -r template; do
+    output="${template%.*}"
+    sigil -f "${template}" IMAGE_TAG="${IMAGE_TAG}" IMAGE_REPO="${IMAGE_REPO}" > "${output}"
+done
+echo "Printing rendered Helm Values"
+cat deploy/values.yaml
+helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
+helm repo add brigade https://azure.github.io/brigade
+helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
+rm -f deploy/requirements.lock
+helm dependency build "deploy/"
+    '''
+}
+
+def helmDryRun(String environment) {
+    def config = getConfig()
+    switchKubeContext(environment)
     helmRenderConfig()
     helmLint()
 
@@ -59,6 +83,33 @@ def helmDryRun() {
 
 }
 
+def switchKubeContext(String environment){
+	if(environment == null){
+	    throw new RuntimeException("Please select an environment to deloy to. Prod or test")	
+	}
+	if( env.CLOUD_TYPE == "GKE"){
+	     String clusterName	
+ 	     String clusterZone
+             if(environment == "prod"){ 
+		   clusterName = env.CLOUD_PROD_CLUSTER_NAME  
+		   clusterZone = env.CLOUD_PROD_CLUSTER_ZONE  
+	     } else if(environment == "test"){
+		   clusterName = env.CLOUD_TEST_CLUSTER_NAME  
+		   clusterZone = env.CLOUD_TEST_CLUSTER_ZONE   
+	     }	
+	     if(clusterName == null || clusterZone == null){
+		     throw new RuntimeException("Environment ${envrionment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")	     
+	     }
+		
+	     sh """		   
+		     gcloud container clusters get-credentials $CLOUD_TEST_CLUSTER_NAME  --zone $CLOUD_TEST_CLUSTER_ZONE
+		     kubectl get pods
+	     """
+	   
+	}
+
+}
+
 def getConfig() {
     def inputFile = readFile('Jenkinsfile.json')
     def config = new groovy.json.JsonSlurperClassic().parseText(inputFile)
@@ -66,8 +117,9 @@ def getConfig() {
     return config
 }
 
-def helmDeploy() {
+def helmDeploy(String environment) {
     def config = getConfig()
+    switchKubeContext(environment)	
 
     helmLint()
 
