@@ -79,11 +79,11 @@ def switchKubeContext(String environment){
 		   clusterZone = env.CLOUD_TEST_CLUSTER_ZONE   
 	     }	
 	     if(clusterName == null || clusterZone == null){
-		     throw new RuntimeException("Environment ${envrionment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")	     
+		     throw new RuntimeException("Environment ${environment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")	     
 	     }
 		
 	     sh """		   
-		     gcloud container clusters get-credentials $CLOUD_TEST_CLUSTER_NAME  --zone $CLOUD_TEST_CLUSTER_ZONE
+		     gcloud container clusters get-credentials ${clusterName}  --zone ${clusterZone}
 		     kubectl get pods
 	     """
 	   
