@@ -60,18 +60,7 @@ def helmDryRun() {
 }
 
 def helmDryRun(String environment) {
-    def config = getConfig()
-    switchKubeContext(environment)
-    helmRenderConfig()
-    helmLint()
-
-    def args = [
-            dry_run    : true,
-            name       : config.helm.name,
-            namespace  : config.helm.namespace
-    ]
-
-    helmDeployRaw(args)
+   helmDryRun()
 
 }
 
