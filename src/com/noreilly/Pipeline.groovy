@@ -43,7 +43,7 @@ helm dependency build "deploy/"
     '''
 }
 
-def helmDryRun() {
+def helmDryRun(String environment) {
     def config = getConfig()
 
     helmRenderConfig()
@@ -55,12 +55,7 @@ def helmDryRun() {
             namespace  : config.helm.namespace
     ]
 
-    helmDeployRaw(args)
-
-}
-
-def helmDryRun(String environment) {
-   helmDryRun()
+    helmDeployRaw(args, environment)
 
 }
 
@@ -79,11 +74,11 @@ def switchKubeContext(String environment){
 		   clusterZone = env.CLOUD_TEST_CLUSTER_ZONE   
 	     }	
 	     if(clusterName == null || clusterZone == null){
-		     throw new RuntimeException("Environment ${envrionment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")	     
+		     throw new RuntimeException("Environment ${environment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")	     
 	     }
 		
 	     sh """		   
-		     gcloud container clusters get-credentials $CLOUD_TEST_CLUSTER_NAME  --zone $CLOUD_TEST_CLUSTER_ZONE
+		     gcloud container clusters get-credentials ${clusterName}  --zone ${clusterZone}
 		     kubectl get pods
 	     """
 	   
@@ -110,10 +105,10 @@ def helmDeploy(String environment) {
             namespace  : config.helm.namespace
     ]
 
-    helmDeployRaw(args)
+    helmDeployRaw(args, environment)
 }
 
-def helmDeployRaw(Map args) {
+def helmDeployRaw(Map args, String environment) {
     helmRenderConfig()
 
     if (args.namespace == null) {
@@ -125,11 +120,11 @@ def helmDeployRaw(Map args) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} deploy --namespace=${namespace} -f deploy/values.yaml"
+        sh "helm upgrade --dry-run --install ${args.name} deploy --namespace=${namespace} -f deploy/${environment}.values.yaml"
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace} -f deploy/values.yaml"
+	    sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace} -f deploy/${environment}.values.yaml"
 
 	sh """
 hosts="\$(kubectl get ingress -l "release=${args.name}" -o json | jq -r ".items[0].spec.rules[] | .host")"
