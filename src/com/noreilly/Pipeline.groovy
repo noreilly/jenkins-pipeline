@@ -7,7 +7,7 @@ def baseTemplate(body){
             containerTemplate(name: 'mvn', image: 'maven:3.5.3', command: 'cat', ttyEnabled: true),
             containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.0.1', command: 'cat', ttyEnabled: true),
             containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.1', command: 'cat', ttyEnabled: true),
-            containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:2.8.2', command: 'cat', ttyEnabled: true)
+            containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:3.0.0', command: 'cat', ttyEnabled: true)
     ],
     volumes: [
         hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
@@ -126,6 +126,19 @@ def helmDeployRaw(Map args) {
 
         sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace} -f deploy/values.yaml"
 
+	sh """
+hosts="$(kubectl get ingress -l "release=${args.name}" -o json | jq -r ".items[0].spec.rules[] | .host")"
+
+for host in \${hosts}; do
+  echo "Attempting to resolve \${host}..."
+  until host \${host};
+  do
+    echo "Waiting for \${host} to resolve..."
+    sleep 1
+  done;
+done
+	"""
+	    
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
 }
