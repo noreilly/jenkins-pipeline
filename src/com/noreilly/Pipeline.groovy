@@ -165,4 +165,32 @@ def getMapValues(Map map = [:]) {
     return map_values
 }
 
+
+
+def publishHelmCharts(){
+    if( env.CLOUD_TYPE == "GKE"){
+        publishHelmChartsGcloud()
+    }
+
+}
+def publishHelmChartsGcloud(){
+    sh '''
+    STABLE_REPO_URL=https://storage.googleapis.com/sy-app-charts
+    helm repo add shipyard-apps  ${STABLE_REPO_URL}
+
+    # Create the stable repository
+    TARGET_DIR=helm-target
+    mkdir -p ${TARGET_DIR}
+    cd ${TARGET_DIR}
+    gsutil cp gs://pd-stable-helm-charts/index.yaml .
+    helm dependency build ../charts/email-service
+    helm package ../charts/email-service   
+    helm repo index --url ${STABLE_REPO_URL} --merge ./index.yaml .
+    gsutil -m rsync ./ gs://sy-app-charts/
+    cd ..
+    ls -l ${STABLE_REPO_DIR}
+'''
+}
+
+
 return this
