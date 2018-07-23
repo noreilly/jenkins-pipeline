@@ -179,7 +179,7 @@ def publishHelmChartsGcloud(){
 //    helm repo add shipyard-apps  ${STABLE_REPO_URL}
 
     # Create the stable repository
-    TARGET_DIR=helm-target
+    TARGET_DIR=helm-build
     mkdir -p ${TARGET_DIR}
     cd ${TARGET_DIR}
     gsutil cp gs://pd-stable-helm-charts/index.yaml .
