@@ -29,7 +29,6 @@ def helmRenderConfig(String chartName) {
     sh '''
 helm init
 helm version
-env
 find "charts/${CHART_NAME}/" -type f -name "*.template" | while IFS= read -r template; do
     output="${template%.*}"
     sigil -f "${template}" IMAGE_TAG="${IMAGE_TAG}" IMAGE_REPO="${IMAGE_REPO}" > "${output}"
