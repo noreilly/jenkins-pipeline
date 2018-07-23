@@ -176,7 +176,7 @@ def publishHelmCharts(){
 def publishHelmChartsGcloud(){
     sh '''
     STABLE_REPO_URL=https://storage.googleapis.com/sy-app-charts
-    helm repo add shipyard-apps  ${STABLE_REPO_URL}
+//    helm repo add shipyard-apps  ${STABLE_REPO_URL}
 
     # Create the stable repository
     TARGET_DIR=helm-target
