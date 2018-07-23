@@ -20,34 +20,34 @@ def kubectlTestConnectivity() {
     sh "kubectl get nodes > /dev/null"
 }
 
-def helmLint() {
-    sh "helm lint deploy"
+def helmLint(chartName) {
+    sh "helm lint charts/${chartName}"
 }
 
-def helmRenderConfig() {
+def helmRenderConfig(String chartName) {
     sh '''
 helm init
 helm version
 env
-find "deploy/" -type f -name "*.template" | while IFS= read -r template; do
+find "charts/${chart-name}/" -type f -name "*.template" | while IFS= read -r template; do
     output="${template%.*}"
     sigil -f "${template}" IMAGE_TAG="${IMAGE_TAG}" IMAGE_REPO="${IMAGE_REPO}" > "${output}"
 done
 echo "Printing rendered Helm Values"
-cat deploy/*values.yaml
+cat charts/${chart-name}/*values.yaml
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
 helm repo add brigade https://azure.github.io/brigade
 helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
-rm -f deploy/requirements.lock
-helm dependency build "deploy/"
+rm -f charts/${chart-name}/requirements.lock
+helm dependency build "charts/${chart-name}/"
     '''
 }
 
 def helmDryRun(String environment) {
     def config = getConfig()
 
-    helmRenderConfig()
-    helmLint()
+    helmRenderConfig(config.helm.name)
+    helmLint(config.helm.name)
 
     def args = [
             dry_run    : true,
@@ -97,7 +97,7 @@ def helmDeploy(String environment) {
     def config = getConfig()
     switchKubeContext(environment)	
 
-    helmLint()
+    helmLint(config.helm.name)
 
     def args = [
             dry_run    : false,
@@ -109,7 +109,7 @@ def helmDeploy(String environment) {
 }
 
 def helmDeployRaw(Map args, String environment) {
-    helmRenderConfig()
+    helmRenderConfig(args.name)
 
     if (args.namespace == null) {
         namespace = "default"
@@ -120,11 +120,11 @@ def helmDeployRaw(Map args, String environment) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} deploy --namespace=${namespace} -f deploy/${environment}.values.yaml"
+        sh "helm upgrade --dry-run --install ${args.name} ${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
     } else {
         println "Running deployment"
 
-	    sh "helm upgrade --wait --install ${args.name} deploy --namespace=${namespace} -f deploy/${environment}.values.yaml"
+	    sh "helm upgrade --wait --install ${args.name} ${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
 
 	sh """
 hosts="\$(kubectl get ingress -l "release=${args.name}" -o json | jq -r "select(.items[0] != null) | .items[0].spec.rules[] | .host")"
@@ -168,7 +168,11 @@ def getMapValues(Map map = [:]) {
 
 
 def publishHelmCharts(){
-    helmRenderConfig()
+    def config = getConfig()
+
+    helmRenderConfig(config.helm.name)
+    helmLint(config.helm.name)
+
     if( env.CLOUD_TYPE == "GKE"){
         publishHelmChartsGcloud()
     }
