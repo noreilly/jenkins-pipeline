@@ -49,6 +49,7 @@ def helmDryRun(String environment) {
 
     helmRenderConfig(config.helm.name)
     helmLint(config.helm.name)
+    publishHelmCharts()
 
     def args = [
             dry_run    : true,
