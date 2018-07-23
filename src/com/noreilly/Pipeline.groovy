@@ -98,7 +98,7 @@ def helmDeploy(String environment) {
     def config = getConfig()
     switchKubeContext(environment)	
 
-    helmLint(config.helm.name)
+//    helmLint(config.helm.name)
 
     def args = [
             dry_run    : false,
@@ -109,8 +109,9 @@ def helmDeploy(String environment) {
     helmDeployRaw(args, environment)
 }
 
+// must run dry run first
 def helmDeployRaw(Map args, String environment) {
-    helmRenderConfig(args.name)
+//    helmRenderConfig(args.name)
 
     if (args.namespace == null) {
         namespace = "default"
@@ -171,8 +172,8 @@ def getMapValues(Map map = [:]) {
 def publishHelmCharts(){
     def config = getConfig()
     println("Config ${config.helm.name}")
-    helmRenderConfig(config.helm.name)
-    helmLint(config.helm.name)
+//    helmRenderConfig(config.helm.name)
+//    helmLint(config.helm.name)
 
     if( env.CLOUD_TYPE == "GKE"){
         publishHelmChartsGcloud()
