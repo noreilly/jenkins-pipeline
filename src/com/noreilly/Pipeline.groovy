@@ -121,11 +121,11 @@ def helmDeployRaw(Map args, String environment) {
     if (args.dry_run) {
         println "Running dry-run deployment"
 
-        sh "helm upgrade --dry-run --install ${args.name} ${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
+        sh "helm upgrade --dry-run --install ${args.name} ./charts/${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
     } else {
         println "Running deployment"
 
-	    sh "helm upgrade --wait --install ${args.name} ${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
+	    sh "helm upgrade --wait --install ${args.name} ./charts/${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
 
 	sh """
 hosts="\$(kubectl get ingress -l "release=${args.name}" -o json | jq -r "select(.items[0] != null) | .items[0].spec.rules[] | .host")"
