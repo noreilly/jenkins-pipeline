@@ -175,7 +175,8 @@ def publishHelmCharts(){
 }
 def publishHelmChartsGcloud(){
     sh '''
-    cd helm-build
+    mkdir helm-target
+    cd helm-target
     gsutil cp gs://pd-stable-helm-charts/index.yaml .
     helm dependency build ../charts/email-service
     helm package ../charts/email-service   
