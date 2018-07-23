@@ -45,7 +45,7 @@ helm dependency build "charts/${chart-name}/"
 
 def helmDryRun(String environment) {
     def config = getConfig()
-    println("Config ${config.helm.name}")
+
     helmRenderConfig(config.helm.name)
     helmLint(config.helm.name)
 
@@ -169,7 +169,7 @@ def getMapValues(Map map = [:]) {
 
 def publishHelmCharts(){
     def config = getConfig()
-
+    println("Config ${config.helm.name}")
     helmRenderConfig(config.helm.name)
     helmLint(config.helm.name)
 
