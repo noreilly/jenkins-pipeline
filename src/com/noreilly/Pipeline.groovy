@@ -175,17 +175,11 @@ def publishHelmCharts(){
 }
 def publishHelmChartsGcloud(){
     sh '''
-    STABLE_REPO_URL=https://storage.googleapis.com/sy-app-charts
-//    helm repo add shipyard-apps  ${STABLE_REPO_URL}
-
-    # Create the stable repository
-    TARGET_DIR=helm-build
-    mkdir -p ${TARGET_DIR}
-    cd ${TARGET_DIR}
+    cd helm-build
     gsutil cp gs://pd-stable-helm-charts/index.yaml .
     helm dependency build ../charts/email-service
     helm package ../charts/email-service   
-    helm repo index --url ${STABLE_REPO_URL} --merge ./index.yaml .
+    helm repo index --url https://storage.googleapis.com/sy-app-charts --merge ./index.yaml .
     gsutil -m rsync ./ gs://sy-app-charts/
     cd ..
     ls -l ${STABLE_REPO_DIR}
