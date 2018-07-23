@@ -168,6 +168,7 @@ def getMapValues(Map map = [:]) {
 
 
 def publishHelmCharts(){
+    helmRenderConfig()
     if( env.CLOUD_TYPE == "GKE"){
         publishHelmChartsGcloud()
     }
