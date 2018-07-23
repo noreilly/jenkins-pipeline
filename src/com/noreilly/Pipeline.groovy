@@ -181,7 +181,7 @@ def publishHelmCharts(){
 }
 def publishHelmChartsGcloud(){
     sh '''
-    mkdir helm-target
+    mkdir -p helm-target
     cd helm-target
     gsutil cp gs://pd-stable-helm-charts/index.yaml .
     helm dependency build ../charts/email-service
