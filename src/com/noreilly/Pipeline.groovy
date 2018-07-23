@@ -25,6 +25,7 @@ def helmLint(chartName) {
 }
 
 def helmRenderConfig(String chartName) {
+    env.CHART_NAME = chartName
     sh '''
 helm init
 helm version
@@ -34,12 +35,12 @@ find "charts/${chart-name}/" -type f -name "*.template" | while IFS= read -r tem
     sigil -f "${template}" IMAGE_TAG="${IMAGE_TAG}" IMAGE_REPO="${IMAGE_REPO}" > "${output}"
 done
 echo "Printing rendered Helm Values"
-cat charts/${chart-name}/*values.yaml
+cat charts/${CHART_NAME}/*values.yaml
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
 helm repo add brigade https://azure.github.io/brigade
 helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
-rm -f charts/${chart-name}/requirements.lock
-helm dependency build "charts/${chart-name}/"
+rm -f charts/${CHART_NAME}/requirements.lock
+helm dependency build "charts/${CHART_NAME}/"
     '''
 }
 
