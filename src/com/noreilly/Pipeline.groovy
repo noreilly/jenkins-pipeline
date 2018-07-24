@@ -178,11 +178,9 @@ def getMapValues(Map map = [:]) {
 def publishHelmCharts() {
     def config = getConfig()
     println("Config ${config.helm.name}")
-//    helmRenderConfig(config.helm.name)
-//    helmLint(config.helm.name)
 
     if (env.CLOUD_TYPE == "GKE") {
-        publishHelmChartsGcloud()
+        publishHelmChartsGcloud(config.helm.name)
     }
 
 }
