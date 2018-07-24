@@ -48,7 +48,7 @@ helm dependency build "charts/${CHART_NAME}/"
     '''
 }
 
-def helmPublishChart(String environment) {
+def helmPublishChart(environment) {
     def config = getConfig()
     switchKubeContext(environment)
     helmRenderConfig(config.helm.name)
