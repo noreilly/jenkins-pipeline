@@ -48,12 +48,12 @@ helm dependency build "charts/${CHART_NAME}/"
     '''
 }
 
-def helmDryRun(String environment) {
+def helmPublishChart(String environment) {
     def config = getConfig()
-
+    switchKubeContext(environment)
     helmRenderConfig(config.helm.name)
     helmLint(config.helm.name)
-    publishHelmCharts()
+
 
     def args = [
             dry_run    : true,
@@ -62,6 +62,8 @@ def helmDryRun(String environment) {
     ]
 
     helmDeployRaw(args, environment)
+
+    publishHelmCharts()
 
 }
 
