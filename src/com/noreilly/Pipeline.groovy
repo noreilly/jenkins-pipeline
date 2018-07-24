@@ -32,7 +32,7 @@ helm version
 
 echo "apiVersion: v1" > charts/${CHART_NAME}/Chart.yaml
 echo "name: $CHART_NAME" >> charts/${CHART_NAME}/Chart.yaml
-echo "version: ${IMAGE_TAG}" > charts/${CHART_NAME}/Chart.yaml
+echo "version: ${IMAGE_TAG}" >> charts/${CHART_NAME}/Chart.yaml
 
 find "charts/${CHART_NAME}/" -type f -name "*.template" | while IFS= read -r template; do
     output="${template%.*}"
