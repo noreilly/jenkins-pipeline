@@ -16,9 +16,6 @@ def baseTemplate(body){
     }
 }
 
-def onFailure() {
-}
-
 def kubectlTestConnectivity() {
     sh "kubectl get nodes > /dev/null"
 }
@@ -149,7 +146,7 @@ done
 def helmDelete(Map args) {
     println "Running helm delete ${args.name}"
 
-    sh "helm delete ${args.name}"
+    sh "helm delete --purge ${args.name}"
 }
 
 @NonCPS
