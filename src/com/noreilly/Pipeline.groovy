@@ -16,6 +16,9 @@ def baseTemplate(body){
     }
 }
 
+def onFailure() {
+}
+
 def kubectlTestConnectivity() {
     sh "kubectl get nodes > /dev/null"
 }
