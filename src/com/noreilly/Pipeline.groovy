@@ -86,7 +86,9 @@ def switchKubeContext(String environment) {
 }
 
 
-def setupKubernetesSecrets(String environment, Map config) {
+def setupKubernetesSecrets(String environment) {
+    def config = getConfig()
+    
     if (environment == null) {
         throw new RuntimeException("Please select an environment to deloy to. prod or test")
     }
