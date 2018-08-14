@@ -3,15 +3,15 @@ package com.noreilly;
 
 def baseTemplate(body) {
     podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
-            containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.19-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
-            containerTemplate(name: 'mvn', image: 'maven:3.5.3', command: 'cat', ttyEnabled: true),
-            containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.1.0', command: 'cat', ttyEnabled: true),
-            containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.1', command: 'cat', ttyEnabled: true),
-            containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:3.0.0', command: 'cat', ttyEnabled: true)
+        containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.19-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
+        containerTemplate(name: 'mvn', image: 'maven:3.5.3', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.1.0', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.1', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:3.0.0', command: 'cat', ttyEnabled: true)
     ],
-            volumes: [
-                    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
-            ]) {
+        volumes: [
+            hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+        ]) {
         body()
     }
 }
@@ -26,7 +26,7 @@ def helmLint(chartName) {
 
 def helmRenderConfig(String chartName) {
     env.CHART_NAME = chartName
-    sh '''
+    sh '''#!/bin/bash
 helm init
 helm version
 
@@ -56,9 +56,9 @@ def helmPublishChart(environment) {
 
 
     def args = [
-            dry_run  : true,
-            name     : config.helm.name,
-            namespace: config.helm.namespace
+        dry_run  : true,
+        name     : config.helm.name,
+        namespace: config.helm.namespace
     ]
 
     helmDeployRaw(args, environment)
@@ -85,13 +85,56 @@ def switchKubeContext(String environment) {
             throw new RuntimeException("Environment ${environment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")
         }
 
-        sh """		   
-		     gcloud container clusters get-credentials ${clusterName}  --zone ${clusterZone}
-		     kubectl get pods
-	     """
+        sh """#!/bin/bash	   
+gcloud container clusters get-credentials ${clusterName}  --zone ${clusterZone}
+kubectl get pods"""
 
     }
 
+}
+
+def setupKubernetesSecrets(String environment, Map config) {
+    if (environment == null) {
+        throw new RuntimeException("Please select an environment to deloy to. prod or test")
+    }
+    if (env.CLOUD_TYPE == "GKE") {
+        String clusterName
+        String clusterZone
+        if (environment == "prod") {
+            clusterName = env.CLOUD_PROD_CLUSTER_NAME
+            clusterZone = env.CLOUD_PROD_CLUSTER_ZONE
+        } else if (environment == "test") {
+            clusterName = env.CLOUD_TEST_CLUSTER_NAME
+            clusterZone = env.CLOUD_TEST_CLUSTER_ZONE
+        }
+        if (clusterName == null || clusterZone == null) {
+            throw new RuntimeException("Environment ${environment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")
+        }
+
+        if (config.helm.containsKey("secrets") && config.helm.secrets.containsKey(environment) && config.helm.containsKey("name")) {
+            name = config.helm.name
+            secrets = config.helm.secrets.get(environment)
+            decryptedSecrets = [:]
+            secrets.each { key, value ->
+                decryptedValue = sh(
+                    script: "set +x; echo -n ${value} | base64 -d | gcloud kms decrypt --location=global --keyring=${clusterName} --key=primary --plaintext-file=- --ciphertext-file=- | base64",
+                    returnStdout: true
+                ).trim()
+                decryptedSecrets.put(key, decryptedValue)
+            }
+            def data = new Yaml().dump(["data": decryptedSecrets])
+            sh """#!/bin/bash
+cat <<EOF | kubectl create -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysecret
+type: Opaque
+${data}
+EOF
+            """
+        }
+    }
 }
 
 def getConfig() {
@@ -104,13 +147,14 @@ def getConfig() {
 def helmDeploy(String environment) {
     def config = getConfig()
     switchKubeContext(environment)
+    setupKubernetesSecrets(environment, config)
 
 //    helmLint(config.helm.name)
 
     def args = [
-            dry_run  : false,
-            name     : config.helm.name,
-            namespace: config.helm.namespace
+        dry_run  : false,
+        name     : config.helm.name,
+        namespace: config.helm.namespace
     ]
 
     helmDeployRaw(args, environment)
