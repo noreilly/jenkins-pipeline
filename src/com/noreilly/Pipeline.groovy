@@ -139,7 +139,6 @@ def getConfig() {
 def helmDeploy(String environment) {
     def config = getConfig()
     switchKubeContext(environment)
-#    setupKubernetesSecrets(environment, config)
 
     helmLint()
 
