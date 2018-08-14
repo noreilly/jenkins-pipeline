@@ -130,7 +130,7 @@ cat <<EOF | kubectl create -f -
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mysecret
+  name: ${name}
 type: Opaque
 ${data}
 EOF
