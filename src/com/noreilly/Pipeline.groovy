@@ -19,11 +19,13 @@ def baseTemplate(body) {
 }
 
 def kubectlTestConnectivity() {
-    sh "kubectl get nodes > /dev/null"
+    sh """#!/bin/bash
+kubectl get nodes > /dev/null"""
 }
 
 def helmLint(chartName) {
-    sh "helm lint charts/${chartName}"
+    sh """#!/bin/bash
+helm lint charts/${chartName}"""
 }
 
 def helmRenderConfig(String chartName) {
@@ -87,7 +89,7 @@ def switchKubeContext(String environment) {
             throw new RuntimeException("Environment ${environment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")
         }
 
-        sh """#!/bin/bash	   
+        sh """#!/bin/bash    
 gcloud container clusters get-credentials ${clusterName}  --zone ${clusterZone}
 kubectl get pods"""
 
@@ -126,7 +128,7 @@ def setupKubernetesSecrets(String environment, Map config) {
             }
             def data = new Yaml().dump(["data": decryptedSecrets])
             sh """#!/bin/bash
-cat <<EOF | kubectl create -f -
+cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
 metadata:
@@ -181,7 +183,7 @@ def helmDeployRaw(Map args, String environment) {
 
         sh "helm upgrade --wait --install ${args.name} ./charts/${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
 
-        sh """
+        sh """#!/bin/bash
 hosts="\$(kubectl get ingress -l "release=${args.name}" -o json | jq -r "select(.items[0] != null) | .items[0].spec.rules[] | .host")"
 
 for host in \${hosts}; do
@@ -192,7 +194,7 @@ for host in \${hosts}; do
     sleep 30
   done;
 done
-	"""
+  """
 
         echo "Application ${args.name} successfully deployed. Use helm status ${args.name} to check"
     }
@@ -233,27 +235,25 @@ def publishHelmCharts() {
 
 def publishHelmChartsGcloud(chartName) {
     env.CHART_NAME = chartName
-    sh '''
-    mkdir -p helm-target
-    cd helm-target
-    gsutil cp gs://pd-stable-helm-charts/index.yaml .
-    helm dependency build ../charts/$CHART_NAME
-    helm package ../charts/$CHART_NAME   
-    helm repo index --url https://storage.googleapis.com/sy-app-charts --merge ./index.yaml .
-    gsutil -m rsync ./ gs://sy-app-charts/
-    cd ..
-    ls -l ${STABLE_REPO_DIR}
-'''
+    sh '''#!/bin/bash
+mkdir -p helm-target
+cd helm-target
+gsutil cp gs://pd-stable-helm-charts/index.yaml .
+helm dependency build ../charts/$CHART_NAME
+helm package ../charts/$CHART_NAME   
+helm repo index --url https://storage.googleapis.com/sy-app-charts --merge ./index.yaml .
+gsutil -m rsync ./ gs://sy-app-charts/
+cd ..
+ls -l ${STABLE_REPO_DIR}'''
 }
 
 def mavenDockerPublish() {
     def pom = readMavenPom file: 'pom.xml'
     env.IMAGE_REPO = pom.properties.getProperty("docker.image_repository")
     env.IMAGE_TAG = "${pom.version}-${env.BUILD_NUMBER}"
-    sh '''
+    sh '''#!/bin/bash
 mvn versions:set -DnewVersion=${IMAGE_TAG}
-mvn deploy -DskipTests=true
-                    '''
+mvn deploy -DskipTests=true'''
 }
 
 return this
