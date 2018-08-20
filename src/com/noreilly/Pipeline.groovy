@@ -4,6 +4,11 @@ package com.noreilly;
 import org.yaml.snakeyaml.Yaml
 
 def baseTemplate(body) {
+    properties([
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '14', numToKeepStr: '')),
+        disableConcurrentBuilds()
+        
+    ])
     podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
         containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.23-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
         containerTemplate(name: 'mvn', image: 'maven:3.5.4', command: 'cat', ttyEnabled: true),
