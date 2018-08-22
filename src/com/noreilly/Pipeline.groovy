@@ -17,8 +17,6 @@ def baseTemplate(body) {
         containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:3.0.0', command: 'cat', ttyEnabled: true)
     ],
         volumes: [
-            persistentVolumeClaim(mountPath: '/root/.m2/repository', claimName: 'maven-cache', readOnly: false),
-            persistentVolumeClaim(mountPath: '/root/.cache/yarn', claimName: 'npm-cache', readOnly: false),
             hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
         ]) {
         body()
