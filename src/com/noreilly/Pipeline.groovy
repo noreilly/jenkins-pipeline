@@ -19,7 +19,6 @@ def baseTemplate(body) {
         containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:3.0.0', command: 'cat', ttyEnabled: true)
     ],
         volumes: [
-            secretVolume(secretName: "maven-settings", mountPath: "/root/.m2"),
             emptyDirVolume(mountPath: "/root/.m2/repository"),
             hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
         ]) {
