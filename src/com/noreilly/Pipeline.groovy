@@ -10,8 +10,8 @@ def baseTemplate(body) {
         
     ])
     podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
-        containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.23-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
-        containerTemplate(name: 'mvn', image: 'maven:3.5.4', command: 'cat', ttyEnabled: true, envVars: [
+        containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.26-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
+        containerTemplate(name: 'mvn', image: 'maven:3-jdk-10', command: 'cat', ttyEnabled: true, envVars: [
             containerEnvVar(key: 'MAVEN_OPTS', value: "-Duser.home=/root -Dmaven.repo.local=/root/")
         ]),
         containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.1.0', command: 'cat', ttyEnabled: true),
