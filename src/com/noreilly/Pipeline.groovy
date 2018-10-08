@@ -5,6 +5,7 @@ def baseTemplate(body) {
     podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
         containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.26-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
         containerTemplate(name: 'mvn', image: 'maven:3-jdk-10', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'golang', image: 'imduffy15/docker-golang:0.0.1', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.0.1', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.1', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:3.0.0', command: 'cat', ttyEnabled: true)
