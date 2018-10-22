@@ -247,7 +247,7 @@ def publishHelmChartsGcloud(chartName) {
     sh '''#!/bin/bash
 mkdir -p helm-target
 cd helm-target
-gsutil cp gs://pd-stable-helm-charts/index.yaml .
+gsutil cp gs://sy-app-charts/index.yaml .
 helm dependency build ../charts/$CHART_NAME
 helm package ../charts/$CHART_NAME   
 helm repo index --url https://storage.googleapis.com/sy-app-charts --merge ./index.yaml .
