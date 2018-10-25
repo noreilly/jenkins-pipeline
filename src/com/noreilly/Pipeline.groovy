@@ -71,10 +71,8 @@ def helmPublishChart(environment) {
         namespace: config.helm.namespace
     ]
 
-    helmDeployRaw(args, environment)
-
     publishHelmCharts()
-
+    helmDeployRaw(args, environment)
 }
 
 def switchKubeContext(String environment) {
