@@ -53,6 +53,7 @@ cat charts/${CHART_NAME}/*values.yaml
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
 helm repo add brigade https://azure.github.io/brigade
 helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
+helm repo add shipyard-apps https://storage.googleapis.com/sy-app-charts
 rm -f charts/${CHART_NAME}/requirements.lock
 helm dependency build "charts/${CHART_NAME}/"
     '''
