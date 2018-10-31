@@ -1,13 +1,11 @@
 #!/usr/bin/groovy
-package com.noreilly;
-
-import org.yaml.snakeyaml.Yaml
+package com.noreilly
 
 def baseTemplate(body) {
     properties([
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '14', numToKeepStr: '')),
         disableConcurrentBuilds()
-        
+
     ])
     podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
         containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:3.26-1', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
@@ -60,89 +58,39 @@ helm dependency build "charts/${CHART_NAME}/"
 }
 
 def helmPublishChart(environment) {
-    def config = getConfig()
-    switchKubeContext(environment)
-    helmRenderConfig(config.helm.name)
-    helmLint(config.helm.name)
+    withKubeContext(environment) {
+        def config = getConfig()
+
+        helmRenderConfig(config.helm.name)
+        helmLint(config.helm.name)
 
 
-    def args = [
-        dry_run  : true,
-        name     : config.helm.name,
-        namespace: config.helm.namespace
-    ]
+        def args = [
+            dry_run  : true,
+            name     : config.helm.name,
+            namespace: config.helm.namespace
+        ]
 
-    publishHelmCharts()
-    helmDeployRaw(args, environment)
+        publishHelmCharts()
+        helmDeployRaw(args, environment)
+    }
 }
 
-def switchKubeContext(String environment) {
+def withKubeContext(environment, closure) {
     if (environment == null) {
-        throw new RuntimeException("Please select an environment to deloy to. Prod or test")
-    }
-    if (env.CLOUD_TYPE == "GKE") {
-        String clusterName
-        String clusterZone
-        if (environment == "prod") {
-            clusterName = env.CLOUD_PROD_CLUSTER_NAME
-            clusterZone = env.CLOUD_PROD_CLUSTER_ZONE
-        } else if (environment == "test") {
-            clusterName = env.CLOUD_TEST_CLUSTER_NAME
-            clusterZone = env.CLOUD_TEST_CLUSTER_ZONE
-        }
-        if (clusterName == null || clusterZone == null) {
-            throw new RuntimeException("Environment ${environment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")
-        }
-
-        sh """#!/bin/bash    
-gcloud container clusters get-credentials ${clusterName}  --zone ${clusterZone}
-kubectl get pods"""
-
+        throw new RuntimeException("Please select an environment to deploy to. production or test")
     }
 
-}
-
-def setupKubernetesSecrets(String environment, Map config) {
-    if (environment == null) {
-        throw new RuntimeException("Please select an environment to deloy to. prod or test")
-    }
-    if (env.CLOUD_TYPE == "GKE") {
-        String clusterName
-        String clusterZone
-        if (environment == "prod") {
-            clusterName = env.CLOUD_PROD_CLUSTER_NAME
-            clusterZone = env.CLOUD_PROD_CLUSTER_ZONE
-        } else if (environment == "test") {
-            clusterName = env.CLOUD_TEST_CLUSTER_NAME
-            clusterZone = env.CLOUD_TEST_CLUSTER_ZONE
+    if (environment == "prod") {
+        withCredentials([[$class: 'FileBinding', credentialsId: "production-kube-config.yaml", variable: 'KUBECONFIG']]) {
+            closure()
         }
-        if (clusterName == null || clusterZone == null) {
-            throw new RuntimeException("Environment ${environment} is not set up. This should be configured through jenkins variables. CLOUD_PROD_CLUSTER_NAME, CLOUD_PROD_CLUSTER_ZONE, CLOUD_TEST_CLUSTER_NAME, CLOUD_TEST_CLUSTER_ZONE")
+    } else if (environment == "test") {
+        withCredentials([[$class: 'FileBinding', credentialsId: "test-kube-config.yaml", variable: 'KUBECONFIG']]) {
+            closure()
         }
-
-        if (config.helm.containsKey("secrets") && config.helm.secrets.containsKey(environment) && config.helm.containsKey("name")) {
-            name = config.helm.name
-            secrets = config.helm.secrets.get(environment)
-            decryptedSecrets = [:]
-            secrets.each { key, value ->
-                decryptedValue = sh(
-                    script: "set +x; echo -n ${value} | base64 -d | gcloud kms decrypt --location=global --keyring=${clusterName} --key=primary --plaintext-file=- --ciphertext-file=- | base64",
-                    returnStdout: true
-                ).trim()
-                decryptedSecrets.put(key, decryptedValue)
-            }
-            def data = new Yaml().dump(["data": decryptedSecrets])
-            sh """#!/bin/bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ${name}
-type: Opaque
-${data}
-EOF
-            """
-        }
+    } else {
+        throw new RuntimeException("No such environment ")
     }
 }
 
@@ -154,25 +102,22 @@ def getConfig() {
 }
 
 def helmDeploy(String environment) {
-    def config = getConfig()
-    switchKubeContext(environment)
-    setupKubernetesSecrets(environment, config)
+    withKubeContext(environment) {
 
-//    helmLint(config.helm.name)
+        def config = getConfig()
 
-    def args = [
-        dry_run  : false,
-        name     : config.helm.name,
-        namespace: config.helm.namespace
-    ]
+        def args = [
+            dry_run  : false,
+            name     : config.helm.name,
+            namespace: config.helm.namespace
+        ]
 
-    helmDeployRaw(args, environment)
+        helmDeployRaw(args, environment)
+    }
 }
 
 // must run dry run first
 def helmDeployRaw(Map args, String environment) {
-//    helmRenderConfig(args.name)
-
     if (args.namespace == null) {
         namespace = "default"
     } else {
@@ -211,34 +156,14 @@ def helmDelete(Map args) {
     sh "helm delete ${args.name}"
 }
 
-@NonCPS
-def getMapValues(Map map = [:]) {
-    // jenkins and workflow restriction force this function instead of map.values(): https://issues.jenkins-ci.org/browse/JENKINS-27421
-    def entries = []
-    def map_values = []
-
-    entries.addAll(map.entrySet())
-
-    for (int i = 0; i < entries.size(); i++) {
-        String value = entries.get(i).value
-        map_values.add(value)
-    }
-
-    return map_values
-}
-
-
 def publishHelmCharts() {
     def config = getConfig()
     println("Config ${config.helm.name}")
 
-    if (env.CLOUD_TYPE == "GKE") {
-        publishHelmChartsGcloud(config.helm.name)
-    }
-
+    publishHelmCharts(config.helm.name)
 }
 
-def publishHelmChartsGcloud(chartName) {
+def publishHelmCharts(chartName) {
     env.CHART_NAME = chartName
     sh '''#!/bin/bash
 mkdir -p helm-target
