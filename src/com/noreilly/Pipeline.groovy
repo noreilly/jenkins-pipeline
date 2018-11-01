@@ -51,7 +51,7 @@ cat charts/${CHART_NAME}/*values.yaml
 helm repo add shipyard-stable https://storage.googleapis.com/pd-stable-helm-charts
 helm repo add brigade https://azure.github.io/brigade
 helm repo add kubernetes-charts http://storage.googleapis.com/kubernetes-charts 
-helm repo add shipyard-apps https://storage.googleapis.com/sy-app-charts
+helm repo add $HELM_CHARTS_REPOSITORY https://storage.googleapis.com/$HELM_CHARTS_REPOSITORY
 rm -f charts/${CHART_NAME}/requirements.lock
 helm dependency build "charts/${CHART_NAME}/"
     '''
@@ -168,11 +168,11 @@ def publishHelmCharts(chartName) {
     sh '''#!/bin/bash
 mkdir -p helm-target
 cd helm-target
-gsutil cp gs://sy-app-charts/index.yaml .
+gsutil cp gs://$HELM_CHARTS_REPOSITORY/index.yaml .
 helm dependency build ../charts/$CHART_NAME
 helm package ../charts/$CHART_NAME   
-helm repo index --url https://storage.googleapis.com/sy-app-charts --merge ./index.yaml .
-gsutil -m rsync ./ gs://sy-app-charts/
+helm repo index --url https://storage.googleapis.com/$HELM_CHARTS_REPOSITORY --merge ./index.yaml .
+gsutil -m rsync ./ gs://$HELM_CHARTS_REPOSITORY/
 cd ..
 ls -l ${STABLE_REPO_DIR}'''
 }
