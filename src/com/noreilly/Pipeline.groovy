@@ -72,7 +72,7 @@ def helmPublishChart(environment) {
         ]
         // Having issue publishing chart on Jenkins
         // The resulting published artefact is not subsequently used, so commeting out
-        // publishHelmCharts()
+        publishHelmCharts()
         helmDeployRaw(args, environment)
     }
 }
@@ -166,16 +166,18 @@ def publishHelmCharts() {
 
 def publishHelmCharts(chartName) {
     env.CHART_NAME = chartName
-    sh '''#!/bin/bash
+    sh '''
+#!/bin/bash
 mkdir -p helm-target
 cd helm-target
-gsutil cp gs://$HELM_CHARTS_REPOSITORY/index.yaml .
+#gsutil cp gs://$HELM_CHARTS_REPOSITORY/index.yaml .
 helm dependency build ../charts/$CHART_NAME
-helm package ../charts/$CHART_NAME   
-helm repo index --url https://storage.googleapis.com/$HELM_CHARTS_REPOSITORY --merge ./index.yaml .
-gsutil -m rsync ./ gs://$HELM_CHARTS_REPOSITORY/
+#helm package ../charts/$CHART_NAME   
+#helm repo index --url https://storage.googleapis.com/$HELM_CHARTS_REPOSITORY --merge ./index.yaml .
+#gsutil -m rsync ./ gs://$HELM_CHARTS_REPOSITORY/
 cd ..
-ls -l ${STABLE_REPO_DIR}'''
+#ls -l ${STABLE_REPO_DIR}
+'''
 }
 
 def mavenDockerPublish() {
