@@ -70,8 +70,9 @@ def helmPublishChart(environment) {
             name     : config.helm.name,
             namespace: config.helm.namespace
         ]
-
-        publishHelmCharts()
+        // Having issue publishing chart on Jenkins
+        // The resulting published artefact is not subsequently used, so commeting out
+        // publishHelmCharts()
         helmDeployRaw(args, environment)
     }
 }
