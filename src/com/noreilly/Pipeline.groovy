@@ -9,7 +9,7 @@ def baseTemplate(body) {
     ])
     podTemplate(label: 'jenkins-pipeline', idleMinutes: 1440, containers: [
         containerTemplate(name: 'jnlp', image: 'imduffy15/jnlp-slave:3.27-1-alpine-2', args: '${computer.jnlpmac} ${computer.name}', workingDir: '/home/jenkins', ttyEnabled: true),
-        containerTemplate(name: 'mvn', image: 'imduffy15/docker-java:0.0.3', command: 'cat', ttyEnabled: true),
+        containerTemplate(name: 'mvn', image: 'imduffy15/docker-java:0.0.4', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'golang', image: 'imduffy15/docker-golang:0.0.3', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.0.2', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.3', command: 'cat', ttyEnabled: true),
