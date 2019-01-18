@@ -14,7 +14,7 @@ def baseTemplate(body) {
         containerTemplate(name: 'node', image: 'imduffy15/docker-frontend:0.0.2', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'docker', image: 'imduffy15/docker-gcloud:0.0.3', command: 'cat', ttyEnabled: true),
         containerTemplate(name: 'helm', image: 'imduffy15/helm-kubectl:3.0.1', command: 'cat', ttyEnabled: true),
-        containerTemplate(name: 'android', image: 'imduffy15/docker-android:0.0.2', command: 'cat', ttyEnabled: true)
+        containerTemplate(name: 'android', image: 'imduffy15/docker-android:0.0.3', command: 'cat', ttyEnabled: true)
     ],
         volumes: [
             hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
