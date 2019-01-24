@@ -184,11 +184,13 @@ gsutil cp README.md gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp -r docs gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp api/src/main/resources/swagger/api.yaml gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
 
 gsutil cp README.md gs://sy-descriptors/smart-services/${NAME}/stable/
 gsutil cp -r docs gs://sy-descriptors/smart-services/${NAME}/stable/
 gsutil cp api/src/main/resources/swagger/api.yaml gs://sy-descriptors/smart-services/${NAME}/stable/
 gsutil cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/stable/
 
 '''
     }
