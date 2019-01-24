@@ -172,7 +172,7 @@ def publishDocumentation() {
     def jenkinsUrl = env.JENKINS_URL - "https://jenkins."
 
     env.NAME = config.helm.name
-    env.IMAGE_TAG = "${pom.version}-${env.BUILD_NUMBER}"
+    env.IMAGE_TAG = "${pom.version}"
 
     if (namespace == "default" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
 
