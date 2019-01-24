@@ -165,6 +165,37 @@ def publishHelmCharts() {
     publishHelmCharts(config.helm.name)
 }
 
+def publishDocumentation() {
+    def pom = readMavenPom file: 'pom.xml'
+    def config = getConfig()
+    def namespace = config.helm.namespace
+    def jenkinsUrl = env.JENKINS_URL - "https://jenkins."
+
+    env.NAME = config.helm.name
+    env.IMAGE_TAG = "${pom.version}-${env.BUILD_NUMBER}"
+
+    if (namespace == "default" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
+
+        echo "Uploading documentation of ${env.name}-${env.IMAGE_TAG}"
+
+        sh '''
+#!/bin/bash
+gsutil cp README.md gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp -r docs gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp api/src/main/resources/swagger/api.yaml gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+
+gsutil cp README.md gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil cp -r docs gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil cp api/src/main/resources/swagger/api.yaml gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/stable/
+
+'''
+    }
+}
+
 def publishHelmCharts(chartName) {
     env.CHART_NAME = chartName
     sh '''
