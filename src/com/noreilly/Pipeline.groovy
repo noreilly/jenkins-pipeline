@@ -165,6 +165,34 @@ def publishHelmCharts() {
     publishHelmCharts(config.helm.name)
 }
 
+def publishUi() {
+    def pom = readMavenPom file: 'pom.xml'
+    def config = getConfig()
+    def namespace = config.helm.namespace
+    def jenkinsUrl = env.JENKINS_URL - "https://jenkins."
+
+    env.NAME = config.helm.name
+    env.SHORT_NAME = config.helm.name - "-service"
+    env.IMAGE_TAG = "${pom.version}"
+
+    if (namespace == "default" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
+
+        echo "Uploading ui of ${env.name}-${env.IMAGE_TAG}"
+
+        sh '''
+#!/bin/bash
+gsutil cp ${SHORT_NAME}.js gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp dependencies.txt gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp -r ${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+
+gsutil cp ${SHORT_NAME}.js gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil cp dependencies.txt gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil cp -r ${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/stable/
+
+'''
+    }
+}
+
 def publishDocumentation() {
     def pom = readMavenPom file: 'pom.xml'
     def config = getConfig()
