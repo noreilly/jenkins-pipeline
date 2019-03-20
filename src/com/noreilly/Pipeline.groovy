@@ -173,7 +173,7 @@ def publishUi() {
 
     env.NAME = config.helm.name
     env.SHORT_NAME = config.helm.name - "-service"
-    env.SHORT_NAME_CAPITAL_LETTER = ${SHORT_NAME}.capitalize()
+    env.SHORT_NAME_CAPITAL_LETTER = (config.helm.name - "-service").capitalize()
     env.IMAGE_TAG = "${pom.version}"
 
     if (namespace == "default" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
