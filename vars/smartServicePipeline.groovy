@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(body) {
+def call(validateAndDeployUi) {
     def pipeline = new com.noreilly.Pipeline()
 
     pipeline.baseTemplate {
@@ -69,9 +69,11 @@ mvn deploy -P prod,api -DskipTests=true
                     }
                 }
 
-                stage('Publish ui') {
-                    container('helm') {
-                        pipeline.publishUi()
+                if(validateAndDeployUi) {
+                    stage('Publish ui') {
+                        container('helm') {
+                            pipeline.publishUi()
+                        }
                     }
                 }
             }
