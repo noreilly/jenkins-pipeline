@@ -95,7 +95,7 @@ def call(validateAndDeployUi = false) {
                 if(validateAndDeployUi) {
                     stage('Trigger ui builder') {
                         container('mvn') {
-                            build job: "/shipyard/factory/vuegg-fork/master", wait: false
+                            build job: "organisation_scan/shipyard%2Ffactory%2Fvuegg-fork", wait: false
                         }
                     }
                 }
