@@ -48,7 +48,7 @@ npm install
 cat widgets/dependencies.txt | while read LINE; do
     eval $LINE
 done
-npm run storybook --ci
+npm run build-storybook
                     '''
                         }
                     }
