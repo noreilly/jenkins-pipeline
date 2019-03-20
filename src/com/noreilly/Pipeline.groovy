@@ -181,13 +181,13 @@ def publishUi() {
 
         sh '''
 #!/bin/bash
-gsutil cp ${SHORT_NAME}.js gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp dependencies.txt gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp -r ${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp ui/widgets/${SHORT_NAME}.js gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp ui/widgets/dependencies.txt gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
 
-gsutil cp ${SHORT_NAME}.js gs://sy-ui-components/smart-services/${NAME}/stable/
-gsutil cp dependencies.txt gs://sy-ui-components/smart-services/${NAME}/stable/
-gsutil cp -r ${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil cp ui/widgets/${SHORT_NAME}.js gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil cp ui/widgets/dependencies.txt gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/stable/
 
 '''
     }

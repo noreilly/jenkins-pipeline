@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(body) {
+def call() {
     def pipeline = new com.noreilly.Pipeline()
 
     pipeline.baseTemplate {
