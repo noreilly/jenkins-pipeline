@@ -44,7 +44,11 @@ mvn clean deploy -P prod -DskipTests=true
                         container('node') {
                             sh '''
 cd ui
-./run-storybook.sh
+npm install
+cat widgets/dependencies.txt | while read LINE; do
+    eval $LINE
+done
+npm run storybook --ci
                     '''
                         }
                     }
