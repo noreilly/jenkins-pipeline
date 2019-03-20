@@ -165,6 +165,18 @@ def publishHelmCharts() {
     publishHelmCharts(config.helm.name)
 }
 
+def syncComponents() {
+
+
+    echo "Syncing components ui components"
+
+    sh '''
+#!/bin/bash
+gsutil cp -R gs://sy-ui-components/smart-services/*/stable/ src/assets/smartServices
+cat *-dependencies.txt > dependencies.txt
+'''
+}
+
 def publishUi() {
     def pom = readMavenPom file: 'pom.xml'
     def config = getConfig()
