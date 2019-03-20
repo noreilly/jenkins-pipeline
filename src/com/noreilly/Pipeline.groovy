@@ -173,6 +173,7 @@ def publishUi() {
 
     env.NAME = config.helm.name
     env.SHORT_NAME = config.helm.name - "-service"
+    env.SHORT_NAME_CAPITAL_LETTER = ${SHORT_NAME}.capitalize()
     env.IMAGE_TAG = "${pom.version}"
 
     if (namespace == "default" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
@@ -181,11 +182,11 @@ def publishUi() {
 
         sh '''
 #!/bin/bash
-gsutil cp ui/widgets/${SHORT_NAME}.js gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp ui/widgets/${SHORT_NAME_CAPITAL_LETTER}.js gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp ui/widgets/dependencies.txt gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
 
-gsutil cp ui/widgets/${SHORT_NAME}.js gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil cp ui/widgets/${SHORT_NAME_CAPITAL_LETTER}.js gs://sy-ui-components/smart-services/${NAME}/stable/
 gsutil cp ui/widgets/dependencies.txt gs://sy-ui-components/smart-services/${NAME}/stable/
 gsutil cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/stable/
 
