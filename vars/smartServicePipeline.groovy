@@ -4,10 +4,10 @@ def call(validateAndDeployUi = false) {
     def pipeline = new com.noreilly.Pipeline()
 
     pipeline.baseTemplate {
-//        node('jenkins-pipeline') {
-//            sh "git config --global http.sslVerify false"
-//
-//            checkout scm
+        node('jenkins-pipeline') {
+            sh "git config --global http.sslVerify false"
+
+            checkout scm
 //            stage('Compile') {
 //                container('mvn') {
 //                    sh '''
@@ -100,7 +100,7 @@ def call(validateAndDeployUi = false) {
                     }
                 }
             }
-        //}
+        }
     //}
 
 }
