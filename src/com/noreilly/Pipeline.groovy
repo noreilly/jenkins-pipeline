@@ -195,11 +195,11 @@ def publishUi() {
         sh '''
 #!/bin/bash
 gsutil cp ui/widgets/${SHORT_NAME_CAPITAL_LETTER}.js gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp ui/widgets/dependencies.txt gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp ui/widgets/${SHORT_NAME}-dependencies.txt gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
 
 gsutil cp ui/widgets/${SHORT_NAME_CAPITAL_LETTER}.js gs://sy-ui-components/smart-services/${NAME}/stable/
-gsutil cp ui/widgets/dependencies.txt gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil cp ui/widgets/${SHORT_NAME}-dependencies.txt gs://sy-ui-components/smart-services/${NAME}/stable/
 gsutil cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/stable/
 
 '''
