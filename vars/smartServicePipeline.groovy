@@ -91,6 +91,14 @@ mvn deploy -P prod,api -DskipTests=true
                         }
                     }
                 }
+
+                if(validateAndDeployUi) {
+                    stage('Trigger ui builder') {
+                        container('mvn') {
+                            build job: "shipyard/factory/vuegg-fork/master", wait: false
+                        }
+                    }
+                }
             }
         }
     }

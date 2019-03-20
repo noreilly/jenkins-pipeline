@@ -172,7 +172,7 @@ def syncComponents() {
 
     sh '''
 #!/bin/bash
-gsutil cp -R gs://sy-ui-components/smart-services/*/stable/* .
+gsutil -m cp -R gs://sy-ui-components/smart-services/*/stable/* .
 cat *-dependencies.txt > dependencies.txt
 '''
 }
@@ -196,11 +196,11 @@ def publishUi() {
 #!/bin/bash
 gsutil cp ui/widgets/${SHORT_NAME_CAPITAL_LETTER}.js gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp ui/widgets/${SHORT_NAME}-dependencies.txt gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil -m cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
 
 gsutil cp ui/widgets/${SHORT_NAME_CAPITAL_LETTER}.js gs://sy-ui-components/smart-services/${NAME}/stable/
 gsutil cp ui/widgets/${SHORT_NAME}-dependencies.txt gs://sy-ui-components/smart-services/${NAME}/stable/
-gsutil cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil -m cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/stable/
 
 '''
     }
@@ -222,16 +222,16 @@ def publishDocumentation() {
         sh '''
 #!/bin/bash
 gsutil cp README.md gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp -r docs gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil -m cp -r docs gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp api/src/main/resources/swagger/api.yaml gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil -m cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil -m cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
 
 gsutil cp README.md gs://sy-descriptors/smart-services/${NAME}/stable/
-gsutil cp -r docs gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil -m cp -r docs gs://sy-descriptors/smart-services/${NAME}/stable/
 gsutil cp api/src/main/resources/swagger/api.yaml gs://sy-descriptors/smart-services/${NAME}/stable/
-gsutil cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/stable/
-gsutil cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil -m cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil -m cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/stable/
 
 '''
     }
