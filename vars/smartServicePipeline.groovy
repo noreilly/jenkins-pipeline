@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def call(validateAndDeployUi) {
+def call(validateAndDeployUi = false) {
     def pipeline = new com.noreilly.Pipeline()
 
     pipeline.baseTemplate {
@@ -36,6 +36,17 @@ cd client-api
 mvn versions:set -DnewVersion=${IMAGE_TAG}
 mvn clean deploy -P prod -DskipTests=true
                     '''
+                    }
+                }
+
+                if(validateAndDeployUi) {
+                    stage('Validate ui') {
+                        container('node') {
+                            sh '''
+cd ui
+./run-storybook.sh
+                    '''
+                        }
                     }
                 }
 
