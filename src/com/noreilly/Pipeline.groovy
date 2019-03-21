@@ -177,7 +177,7 @@ touch ../../../dependencies.txt
 cat *-dependencies.txt > ../../../dependencies.txt
 cat ../../../dependencies.txt
 cd ../../../
-ls
+ls -a
 '''
 }
 
