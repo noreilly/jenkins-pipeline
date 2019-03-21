@@ -165,6 +165,48 @@ def publishHelmCharts() {
     publishHelmCharts(config.helm.name)
 }
 
+def syncComponents() {
+
+
+    echo "Syncing components ui components"
+
+    sh '''
+#!/bin/bash
+cd client/src/assets/smartServices
+gsutil -m cp -R gs://sy-ui-components/smart-services/*/stable/* .
+.dependencies[].command > ../../../dependencies.txt
+'''
+}
+
+def publishUi() {
+    def pom = readMavenPom file: 'pom.xml'
+    def config = getConfig()
+    def namespace = config.helm.namespace
+    def jenkinsUrl = env.JENKINS_URL - "https://jenkins."
+
+    env.NAME = config.helm.name
+    env.SHORT_NAME = config.helm.name - "-service"
+    env.SHORT_NAME_CAPITAL_LETTER = (config.helm.name - "-service").capitalize()
+    env.IMAGE_TAG = "${pom.version}"
+
+    if (namespace == "default" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
+
+        echo "Uploading ui of ${env.name}-${env.IMAGE_TAG}"
+
+        sh '''
+#!/bin/bash
+gsutil cp ui/widgets/${SHORT_NAME_CAPITAL_LETTER}.js gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil cp ui/widgets/${SHORT_NAME}-dependencies.txt gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil -m cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/${IMAGE_TAG}/
+
+gsutil cp ui/widgets/${SHORT_NAME_CAPITAL_LETTER}.js gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil cp ui/widgets/${SHORT_NAME}-dependencies.txt gs://sy-ui-components/smart-services/${NAME}/stable/
+gsutil -m cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${NAME}/stable/
+
+'''
+    }
+}
+
 def publishDocumentation() {
     def pom = readMavenPom file: 'pom.xml'
     def config = getConfig()
@@ -181,16 +223,16 @@ def publishDocumentation() {
         sh '''
 #!/bin/bash
 gsutil cp README.md gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp -r docs gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil -m cp -r docs gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
 gsutil cp api/src/main/resources/swagger/api.yaml gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
-gsutil cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil -m cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
+gsutil -m cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/${IMAGE_TAG}/
 
 gsutil cp README.md gs://sy-descriptors/smart-services/${NAME}/stable/
-gsutil cp -r docs gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil -m cp -r docs gs://sy-descriptors/smart-services/${NAME}/stable/
 gsutil cp api/src/main/resources/swagger/api.yaml gs://sy-descriptors/smart-services/${NAME}/stable/
-gsutil cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/stable/
-gsutil cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil -m cp -r api/target/swagger gs://sy-descriptors/smart-services/${NAME}/stable/
+gsutil -m cp -r api/target/spock-reports gs://sy-descriptors/smart-services/${NAME}/stable/
 
 '''
     }
