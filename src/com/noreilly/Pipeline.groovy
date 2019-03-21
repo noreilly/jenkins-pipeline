@@ -176,6 +176,8 @@ gsutil -m cp -R gs://sy-ui-components/smart-services/*/stable/* .
 touch ../../../dependencies.txt
 cat *-dependencies.txt > ../../../dependencies.txt
 cat ../../../dependencies.txt
+cd ../../../
+ls
 '''
 }
 
