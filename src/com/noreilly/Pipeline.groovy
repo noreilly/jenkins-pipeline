@@ -172,8 +172,8 @@ def syncComponents() {
 
     sh '''
 #!/bin/bash
-gsutil -m cp -R gs://sy-ui-components/smart-services/*/stable/* .
-cat *-dependencies.txt > dependencies.txt
+gsutil -m cp -R gs://sy-ui-components/smart-services/*/stable/* src/assets/smartServices/
+cat src/assets/smartServices/*-dependencies.txt > dependencies.txt
 '''
 }
 
