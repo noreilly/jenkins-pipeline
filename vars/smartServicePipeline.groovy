@@ -47,7 +47,7 @@ cd ui
 npm install
 npm run extract-dependencies
 cat dependencies.txt | while read LINE; do
-    eval $LINE
+    eval ${LINE}
 done
 npm run build-storybook
                     '''
