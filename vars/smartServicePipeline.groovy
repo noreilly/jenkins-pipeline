@@ -45,7 +45,8 @@ mvn clean deploy -P prod -DskipTests=true
                             sh '''
 cd ui
 npm install
-cat widgets/*-configuration.json | jq .dependencies[].command | while read LINE; do
+npm run extract-dependencies
+cat dependencies.txt | while read LINE; do
     eval $LINE
 done
 npm run build-storybook
