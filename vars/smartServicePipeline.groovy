@@ -45,10 +45,7 @@ mvn clean deploy -P prod -DskipTests=true
                             sh '''
 cd ui
 npm install
-npm run extract-dependencies
-cat dependencies.txt | while read LINE; do
-    eval ${LINE}
-done
+npm run import-dependencies
 npm run build-storybook
                     '''
                         }
