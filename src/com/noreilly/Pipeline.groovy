@@ -189,7 +189,7 @@ def publishUi() {
     env.SHORT_NAME_CAPITAL_LETTER = (config.helm.name - "-service").capitalize()
     env.IMAGE_TAG = "${pom.version}"
 
-    if (namespace == "default" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
+    if (namespace == "smart-service" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
 
         echo "Uploading ui of ${env.name}-${env.IMAGE_TAG}"
 
@@ -216,7 +216,7 @@ def publishDocumentation() {
     env.NAME = config.helm.name
     env.IMAGE_TAG = "${pom.version}"
 
-    if (namespace == "default" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
+    if (namespace == "smart-service" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
 
         echo "Uploading documentation of ${env.name}-${env.IMAGE_TAG}"
 
