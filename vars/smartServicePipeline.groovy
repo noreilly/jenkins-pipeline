@@ -42,12 +42,7 @@ mvn clean deploy -P prod -DskipTests=true
                 if(validateAndDeployUi) {
                     stage('Validate ui') {
                         container('node') {
-                            sh '''
-cd ui
-npm install
-npm run import-dependencies
-npm run build-storybook
-                    '''
+                            pipeline.validateUi()
                         }
                     }
                 }

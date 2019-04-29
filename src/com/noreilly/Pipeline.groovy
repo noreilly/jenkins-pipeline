@@ -194,6 +194,29 @@ gsutil -m cp -r ui/widgets/${SHORT_NAME} gs://sy-ui-components/smart-services/${
     }
 }
 
+def validateUi() {
+    def pom = readMavenPom file: 'pom.xml'
+    def config = getConfig()
+    def namespace = config.helm.namespace
+    def jenkinsUrl = env.JENKINS_URL - "https://jenkins."
+
+    env.NAME = config.helm.name
+    env.IMAGE_TAG = "${pom.version}"
+
+    if (namespace == "smart-service" && jenkinsUrl.startsWith("tooling.shipyardtech.com")) {
+
+        echo "Validating ui of ${env.name}-${env.IMAGE_TAG}"
+
+        sh '''
+#!/bin/bash
+cd ui
+npm install
+npm run import-dependencies
+npm run build-storybook
+'''
+    }
+}
+
 def publishDocumentation() {
     def pom = readMavenPom file: 'pom.xml'
     def config = getConfig()
