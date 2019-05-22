@@ -133,7 +133,7 @@ def helmDeployRaw(Map args, String environment) {
     } else {
         println "Running deployment"
 
-        sh "helm upgrade --debug  --wait --install ${args.name} ./charts/${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
+        sh "helm upgrade --atomic  --debug  --wait --install ${args.name} ./charts/${args.name} --namespace=${namespace} -f charts/${args.name}/${environment}.values.yaml"
 
         sh """#!/bin/bash
 hosts="\$(kubectl get ingress -l "release=${args.name}" -o json | jq -r "select(.items[0] != null) | .items[0].spec.rules[] | .host")"
