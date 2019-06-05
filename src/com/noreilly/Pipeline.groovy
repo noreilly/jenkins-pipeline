@@ -139,6 +139,11 @@ def helmDeployRaw(Map args, String environment) {
 hosts="\$(kubectl get ingress -l "release=${args.name}" -o json | jq -r "select(.items[0] != null) | .items[0].spec.rules[] | .host")"
 
 for host in \${hosts}; do
+  if [ "\${host:0:2}" == "*." ]; then
+    echo "Found wildcard host \${host}"
+    host=shipyard\${host:1}
+    echo "Changed * to shipyard - will attempt to resolve \${host} instead"
+  fi
   echo "Attempting to resolve \${host}..."
   until host \${host};
   do
